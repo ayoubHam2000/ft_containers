@@ -5,7 +5,7 @@ cmake-build-debug
 **/*.a
 **/*.o
 _OUT/
-containers
+ft_containers
 #CMakeLists.txt
 
 .idea/**/workspace.xml

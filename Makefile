@@ -10,7 +10,7 @@ DEPS = $(OBJ:.o=.d)
 DEPFLAGS = -MMD -MF $(@:.o=.d)
 CFLAGS =  -I ./headers -std=c++98 -g
 #-Wall -Wextra -Werror
-NAME = containers
+NAME = ft_containers
 
 all: $(NAME)
 
