@@ -9,14 +9,17 @@
 #include <vector>
 #include <algorithm>
 
+#include "headers/iterator.hpp"
+#include "headers/vector.hpp"
+#include "headers/algorithm.h"
 
 using namespace std;
 
 int main()
 {
-	vector<int> a = {1, 2, 3};
-	vector<int> b = {1, 2, 3};
 
-	cout << (a < b) << endl;
+	ft::vector<int> a;
+
+	ft::vector<int> b(a.begin(), a.end());
 	return (0);
 }
