@@ -2,11 +2,11 @@
 /*     created by aben-ham 11/13/22         */
 /*******************************************/
 
-#ifndef FT_CONTAINERS_ALGORITHM_H
-#define FT_CONTAINERS_ALGORITHM_H
+#ifndef FT_CONTAINERS_ALGORITHM_HPP
+#define FT_CONTAINERS_ALGORITHM_HPP
 
 #include <iostream>
-#include "headers/utils.hpp"
+#include "utils.hpp"
 
 namespace ft{
 
@@ -19,7 +19,7 @@ namespace ft{
 	 */
 	template <class InputIterator1, class InputIterator2>
 	bool equal(
-			InputIterator1 first1, InputIterator1 last1, InputIterator1 first2
+			InputIterator1 first1, InputIterator1 last1, InputIterator2 first2
 	){
 		for (; first1 != last1; ++first1, ++first2){
 			if (*first1 != *first2)
@@ -73,4 +73,4 @@ namespace ft{
 	};
 }
 
-#endif //FT_CONTAINERS_ALGORITHM_H
+#endif //FT_CONTAINERS_ALGORITHM_HPP

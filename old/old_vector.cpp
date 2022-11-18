@@ -40,9 +40,9 @@ namespace ft{
 	public:
 
 #pragma region Constructors
-	/*****************************************************************/
-	// Constructors ✅
-	/*****************************************************************/
+		/*****************************************************************/
+		// Constructors ✅
+		/*****************************************************************/
 
 		/**
 		 * @name default constructor
@@ -54,7 +54,7 @@ namespace ft{
 		 * std::allocator will be used.
 		 * */
 		explicit vector(const allocator_type &alloc = allocator_type())
-		:
+				:
 				_first(nullptr),
 				_last(nullptr),
 				_last_max(nullptr),
@@ -79,8 +79,8 @@ namespace ft{
 				size_type n,
 				const value_type& val = value_type(),
 				const allocator_type& alloc = allocator_type()
-						)
-		:
+		)
+				:
 				_first(nullptr),
 				_last(nullptr),
 				_last_max(nullptr),
@@ -101,21 +101,21 @@ namespace ft{
 		 * std::allocator will be used.
 		 */
 
-		 //std::is_constructible<value_type, typename iterator_traits<InputIterator>::reference>::value
+		//std::is_constructible<value_type, typename iterator_traits<InputIterator>::reference>::value
 		template <class InputIterator>
 		vector (
 				InputIterator first,
 				typename enable_if<
-				        ft::is_valid_input_iterator<value_type, InputIterator>::value,
+						ft::is_valid_input_iterator<value_type, InputIterator>::value,
 						InputIterator
-						>::type last,
+				>::type last,
 				const allocator_type& alloc = allocator_type()
-				)
-	   :
-			_first(nullptr),
-			_last(nullptr),
-			_last_max(nullptr),
-			_alloc(alloc)
+		)
+				:
+				_first(nullptr),
+				_last(nullptr),
+				_last_max(nullptr),
+				_alloc(alloc)
 		{
 			insert(begin(), first, last);
 		}
@@ -126,7 +126,7 @@ namespace ft{
 		 * @param x Another vector object of the same type (with the same class template arguments T and Alloc), whose contents are either copied or acquired.
 		 */
 		vector (const vector& x)
-		:
+				:
 				_first(nullptr),
 				_last(nullptr),
 				_last_max(nullptr),
@@ -142,7 +142,6 @@ namespace ft{
 		}
 
 		vector& operator=(const vector &other){
-			clear();
 			this->insert(begin(), other.begin(), other.end());
 			return (*this);
 		}
@@ -150,9 +149,9 @@ namespace ft{
 #pragma endregion
 
 #pragma region Modifiers
-	/*****************************************************************/
-	// Modifiers (insert ✔, assign ✔, push_back ✔, pop_back ✔, erase ✔, swap ✔, clear ✔) ✔
-	/*****************************************************************/
+		/*****************************************************************/
+		// Modifiers (insert ✔, assign ✔, push_back ✔, pop_back ✔, erase ✔, swap ✔, clear ✔) ✔
+		/*****************************************************************/
 
 		/**
 		 * @param position The position where insert.
@@ -223,7 +222,7 @@ namespace ft{
 				>::type last)
 		{
 			//alloc and shift or just shift
- 			size_type n = static_cast<size_type>(distance_iterator(first, last));
+			size_type n = static_cast<size_type>(distance_iterator(first, last));
 			size_type pos = static_cast<size_type>(&(*position) - _first);
 			if (!n)
 				return ;
@@ -256,12 +255,9 @@ namespace ft{
 						InputIterator
 				>::type last)
 		{
-			size_type 		pos = &(*position) - _first;
 			InputIterator	tmp = first;
 			while (tmp != last){
-				insert(iterator(_first + pos), *tmp);
-				++tmp;
-				pos++;
+				insert(position, *tmp++);
 			}
 		}
 
@@ -332,7 +328,7 @@ namespace ft{
 		 * @brief Removes the last element in the vector, effectively reducing the container size by one.
 		 */
 		void pop_back(){
-			erase(iterator(_last - 1));
+			erase(iterator(_last));
 		}
 
 		/**
@@ -362,9 +358,9 @@ namespace ft{
 #pragma endregion
 
 #pragma region capacity
-	/*****************************************************************/
-	// Capacity (size, capacity, max_size, resize, empty, reserve, shrink_to_fit) ✔
-	/*****************************************************************/
+		/*****************************************************************/
+		// Capacity (size, capacity, max_size, resize, empty, reserve, shrink_to_fit) ✔
+		/*****************************************************************/
 
 		/**
 		 * @name size
@@ -433,11 +429,11 @@ namespace ft{
 		 * @param n Minimum capacity for the vector.
 		 */
 		void reserve (size_type n){
-			if (n > capacity()){
-				size_type a = __get_new_capacity(n);
-				if (a >= max_size() && n < a)
-					a = n;
-				_add_space(0, 0, n);
+			size_type capacity = this->capacity();
+			if (n > capacity){
+				while (capacity < n)
+					capacity *= 2;
+				_add_space(0, 0, capacity);
 			}
 		}
 
@@ -460,9 +456,9 @@ namespace ft{
 #pragma endregion
 
 #pragma region Iterator
-	/*****************************************************************/
-	// Iterators (begin, end, rbegin, rend, cbegin, cend, crbegin, crend) ✔
-	/*****************************************************************/
+		/*****************************************************************/
+		// Iterators (begin, end, rbegin, rend, cbegin, cend, crbegin, crend) ✔
+		/*****************************************************************/
 
 		iterator begin() _NOEXCEPT{
 			return iterator (_first);
@@ -481,17 +477,17 @@ namespace ft{
 		}
 
 		reverse_iterator rbegin() _NOEXCEPT{
-			return (reverse_iterator(end()));
+			return (reverse_iterator(begin()));
 		}
 		const_reverse_iterator rbegin() const _NOEXCEPT{
-			return (const_reverse_iterator(end()));
+			return (const_reverse_iterator(begin()));
 		}
 
 		reverse_iterator rend() _NOEXCEPT{
-			return (reverse_iterator(begin()));
+			return (reverse_iterator(end()));
 		}
 		const_reverse_iterator rend() const _NOEXCEPT{
-			return (const_reverse_iterator(begin()));
+			return (const_reverse_iterator(end()));
 		}
 
 		const_iterator cbegin() const _NOEXCEPT{
@@ -512,108 +508,108 @@ namespace ft{
 #pragma endregion
 
 #pragma region Element_access
-	/*****************************************************************/
-	// Element access (operator[] ✔, at ✔, front ✔,back ✔,data ✔) ✔
-	/*****************************************************************/
+		/*****************************************************************/
+		// Element access (operator[] ✔, at ✔, front ✔,back ✔,data ✔) ✔
+		/*****************************************************************/
 
-	/**
-	 * @name operator[]
-	 * @brief Returns a reference to the element at position n in the vector container.
-	 * @details A similar member function, vector::at, has the same behavior as this operator function, except that vector::at
-	 * is bound-checked and signals if the requested position is out of range by throwing an out_of_range exception.
-	 * Portable programs should never call this function with an argument n that is out of range, since this causes undefined behavior.
-	 * @return The element at the specified position in the vector.
-	 */
-	reference operator[] (size_type n){
-		return *(_first + n);
-	}
+		/**
+		 * @name operator[]
+		 * @brief Returns a reference to the element at position n in the vector container.
+		 * @details A similar member function, vector::at, has the same behavior as this operator function, except that vector::at
+		 * is bound-checked and signals if the requested position is out of range by throwing an out_of_range exception.
+		 * Portable programs should never call this function with an argument n that is out of range, since this causes undefined behavior.
+		 * @return The element at the specified position in the vector.
+		 */
+		reference operator[] (size_type n){
+			return *(_first + n);
+		}
 
-	const_reference operator[] (size_type n) const{
-		return *(_first + n);
-	}
+		const_reference operator[] (size_type n) const{
+			return *(_first + n);
+		}
 
-	/**
-	 * @name at
-	 * @brief Returns a reference to the element at position n in the vector.
-	 * @details The function automatically checks whether n is within the bounds of valid elements in the vector, throwing an out_of_range exception if it is not (i.e., if n is greater than, or equal to, its size). This is in contrast with member operator[], that does not check against bounds.
-	 * @return The element at the specified position in the container.
-	 */
-	reference at (size_type n){
-		if (n >= size())
-			throw std::out_of_range("");
-		return *(_first + n);
-	}
+		/**
+		 * @name at
+		 * @brief Returns a reference to the element at position n in the vector.
+		 * @details The function automatically checks whether n is within the bounds of valid elements in the vector, throwing an out_of_range exception if it is not (i.e., if n is greater than, or equal to, its size). This is in contrast with member operator[], that does not check against bounds.
+		 * @return The element at the specified position in the container.
+		 */
+		reference at (size_type n){
+			if (n >= size())
+				throw std::out_of_range("");
+			return *(_first + n);
+		}
 
-	const_reference at (size_type n) const{
-		if (n >= size())
-			throw std::out_of_range("ft::vector");
-		return *(_first + n);
-	}
+		const_reference at (size_type n) const{
+			if (n >= size())
+				throw std::out_of_range("ft::vector");
+			return *(_first + n);
+		}
 
-	/**
-	 * @name front
-	 * @brief Returns a reference to the first element in the vector.
-	 * @return A reference to the first element in the vector container.
-	 */
-	reference front(){
-		return (*_first);
-	}
+		/**
+		 * @name front
+		 * @brief Returns a reference to the first element in the vector.
+		 * @return A reference to the first element in the vector container.
+		 */
+		reference front(){
+			return (*_first);
+		}
 
-	const_reference front() const{
-		return (*_first);
-	}
+		const_reference front() const{
+			return (*_first);
+		}
 
-	/**
-	 * @name back
-	 * @brief Returns a reference to the last element in the vector.
-	 * @return A reference to the last element in the vector.
-	 */
-	reference back(){
-		return (*(_last - 1));
-	}
+		/**
+		 * @name back
+		 * @brief Returns a reference to the last element in the vector.
+		 * @return A reference to the last element in the vector.
+		 */
+		reference back(){
+			return (*(_last - 1));
+		}
 
-	const_reference back() const{
-		return (*(_last - 1));
-	}
+		const_reference back() const{
+			return (*(_last - 1));
+		}
 
-	/**
-	 * @name data
-	 * @brief Returns a direct pointer to the memory array used internally by the vector to store its owned elements.
-	 * @return A pointer to the first element in the array used internally by the vector.
-	 */
-	pointer data() _NOEXCEPT{
-		return (_first);
-	}
+		/**
+		 * @name data
+		 * @brief Returns a direct pointer to the memory array used internally by the vector to store its owned elements.
+		 * @return A pointer to the first element in the array used internally by the vector.
+		 */
+		pointer data() _NOEXCEPT{
+			return (_first);
+		}
 
-	const pointer data() const _NOEXCEPT{
-		return (_first);
-	}
+		const pointer data() const _NOEXCEPT{
+			return (_first);
+		}
 
 #pragma endregion
 
 #pragma region Allocator
-	/*****************************************************************/
-	// Allocator (get_allocator)
-	/*****************************************************************/
+		/*****************************************************************/
+		// Allocator (get_allocator)
+		/*****************************************************************/
 
-	/**
-	 * @name get_allocator
-	 * @brief Returns a copy of the allocator object associated with the vector.
-	 */
-	allocator_type get_allocator() const _NOEXCEPT{
-		return (allocator_type (_alloc));
-	}
-
-
+		/**
+		 * @name get_allocator
+		 * @brief Returns a copy of the allocator object associated with the vector.
+		 */
+		allocator_type get_allocator() const _NOEXCEPT{
+			return (allocator_type (_alloc));
+		}
 
 
-	/*****************************************************************/
-	// Private Section
-	/*****************************************************************/
+
+
+		/*****************************************************************/
+		// Private Section
+		/*****************************************************************/
 #pragma endregion
 
 #pragma region private
-		private:
+	private:
 
 		size_type __get_new_capacity(size_type capacity){
 			size_type s = this->capacity();
@@ -622,34 +618,6 @@ namespace ft{
 			while (s < capacity)
 				s *= 2;
 			return (s);
-		}
-
-		/**
-		 * @name __move_to
-		 * @brief move size objects from src to dist. the dist and src are in the same memory region (may overlap)
-		 */
-		void __move_to(pointer dist, pointer src, size_type size){
-			if (dist > src){
-				while (size--){
-					_alloc.construct(dist + size, *(src + size));
-					_alloc.destroy(src + size);
-				}
-			}else {
-				while (size--){
-					_alloc.destroy(dist);
-					_alloc.construct(dist, *src);
-					dist++;
-					src++;
-				}
-			}
-
-		}
-
-		void __copy_to(pointer arr2, pointer arr1, size_type size){
-			while (size--){
-				_alloc.construct(arr2++, *arr1);
-				_alloc.destroy(arr1++);
-			}
 		}
 
 		/**
@@ -665,10 +633,8 @@ namespace ft{
 
 			//copy and shift
 			if (_first){
-				//std::memcpy(new_arr, _first, sizeof(value_type) * pos);
-				//std::memcpy(new_arr + pos + nb_shift, _first + pos, sizeof(value_type) * (size - pos));
-				__move_to(new_arr, _first, pos);
-				__move_to(new_arr + pos + nb_shift, _first + pos, (size - pos));
+				std::memcpy(new_arr, _first, sizeof(value_type) * pos);
+				std::memcpy(new_arr + pos + nb_shift, _first + pos, sizeof(value_type) * (size - pos));
 				_alloc.deallocate(_first, capacity);
 			}
 
@@ -685,8 +651,7 @@ namespace ft{
 		void _shift_right(size_type pos, size_type nb_shift){
 			pointer	dist = _first + pos + nb_shift;
 			pointer src = _first + pos;
-			//std::memmove(dist, src, sizeof(value_type) * (size() - pos));
-			__move_to(dist, src, (size() - pos));
+			std::memmove(dist, src, sizeof(value_type) * (size() - pos));
 			_last += nb_shift;
 		}
 
@@ -701,7 +666,6 @@ namespace ft{
 			pointer src = _first + pos;
 			size_type nb_elem = static_cast<size_type>(_last - src);
 			std::memmove(dist, src, sizeof(value_type) * (nb_elem));
-			//__move_to(dist, src, (nb_elem));
 			_last -= nb_shift;
 		}
 

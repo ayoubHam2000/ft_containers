@@ -97,6 +97,36 @@ namespace ft{
 		return last - first;
 	}
 
+
+	//=============================
+
+	template <class _ValueType, class _Type, class _To, bool>
+	struct __is_valid_iterator{
+		static const bool value =
+				std::is_convertible<typename iterator_traits<_Type>::iterator_category, _To>::value &&
+						std::is_constructible<_ValueType, typename iterator_traits<_Type>::reference>::value;
+	};
+
+	template <class _ValueType, class _Type, class _To>
+	struct __is_valid_iterator<_ValueType, _Type, _To, false> : public false_type {};
+
+	//
+	template <class _ValueType, class _Type>
+	struct is_valid_input_iterator :
+			public __is_valid_iterator<
+			_ValueType,
+			_Type,
+			std::input_iterator_tag,
+			!is_integral<_Type>::value> {};
+
+	template <class _ValueType, class _Type>
+	struct is_valid_forward_iterator :
+			public __is_valid_iterator<
+			_ValueType,
+			_Type,
+			std::forward_iterator_tag,
+			!is_integral<_Type>::value> {};
+
 }
 
 #endif //FT_CONTAINERS_UTILS_HPP

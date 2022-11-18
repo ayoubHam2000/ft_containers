@@ -3,6 +3,8 @@ project(ft_containers)
 
 set(CMAKE_CXX_STANDARD 98)
 
+#set(CMAKE_CXX_FLAGS "-Wall -Werror -Wextra")
+
 include_directories(.)
 
 add_executable(ft_containers
@@ -11,4 +13,4 @@ add_executable(ft_containers
         src/containers/vector.cpp
         src/iterators/iterator.cpp
         headers/iterator.hpp
-        main.cpp headers/utils.hpp test.cpp headers/algorithm.h)
+        main.cpp headers/utils.hpp test.cpp headers/algorithm.hpp headers/track_alloc.hpp)
