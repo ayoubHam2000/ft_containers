@@ -9,6 +9,7 @@
 #include "utils.hpp"
 #include "algorithm.hpp"
 
+//TODO Length error max_length
 namespace ft{
 
 	template <class T, class Allocator = std::allocator<T> >
@@ -136,9 +137,10 @@ namespace ft{
 		}
 
 		~vector(){
-			_destroy_all();
-			if (_first)
+			if (_first){
+				_destroy_all();
 				_alloc.deallocate(_first, capacity());
+			}
 		}
 
 		vector& operator=(const vector &other){
@@ -161,14 +163,14 @@ namespace ft{
 		 * elements.
 		 */
 		iterator insert (iterator position, const_reference val){
-			size_type pos = static_cast<size_type>(&(*position) - _first);
-			if (_last_max - _last < 1){
-				_add_space(pos, 1);
-			}
-			else{
-				_shift_right(pos, 1);
-			}
-			_alloc.construct(_first + pos, val);
+			size_type pos 		= static_cast<size_type>(&(*position) - _first);
+			pointer	  old_last 	= _last;
+
+			bool is_new_space = _shift_to_right(pos, 1);
+			if (_first + pos >= old_last || is_new_space)
+				_alloc.construct(_first + pos, val);
+			else
+				(*(_first + pos)) = val;
 			return (iterator(_first + pos));
 		}
 
@@ -185,16 +187,16 @@ namespace ft{
 		 * @param val The element to insert.
 		 */
 		void insert (iterator position, size_type n, const_reference val){
-			if (!n)
-				return ;
-			size_type pos = static_cast<size_type>(&(*position) - _first);
-			if (_remains_space() < n){
-				_add_space(pos, n);
-			}
-			else{
-				_shift_right(pos, n);
-			}
+			size_type pos 			= static_cast<size_type>(&(*position) - _first);
+			pointer	  old_last 		= _last;
+
+			bool is_new_space = _shift_to_right(pos, n);
 			pointer elem = _first + pos;
+			while (elem < old_last && n && !is_new_space){
+				(*elem) = val;
+				++elem;
+				--n;
+			}
 			while (n--){
 				_alloc.construct(elem, val);
 				++elem;
@@ -225,24 +227,21 @@ namespace ft{
 			//alloc and shift or just shift
  			size_type n = static_cast<size_type>(distance_iterator(first, last));
 			size_type pos = static_cast<size_type>(&(*position) - _first);
-			if (!n)
-				return ;
+			pointer	  old_last = _last;
 
-			//add space and shift or just shift
-			if (_remains_space() < n){
-				_add_space(pos, n);
-			}
-			else{
-				_shift_right(pos, n);
-			}
-
-			//copy
-			pointer			elem = _first + pos;
+			bool is_new_space = _shift_to_right(pos, n);
+			pointer 		elem 	= _first + pos;
 			InputIterator	new_ele = first;
+			while (elem < old_last && n && !is_new_space){
+				(*elem) = (*new_ele);
+				++elem;
+				++new_ele;
+				--n;
+			}
 			while (n--){
 				_alloc.construct(elem, *new_ele);
-				++new_ele;
 				++elem;
+				++new_ele;
 			}
 		}
 
@@ -261,7 +260,7 @@ namespace ft{
 			while (tmp != last){
 				insert(iterator(_first + pos), *tmp);
 				++tmp;
-				pos++;
+				++pos;
 			}
 		}
 
@@ -276,23 +275,14 @@ namespace ft{
 		 */
 		iterator erase (iterator position){
 			size_type pos = static_cast<size_type>(&(*position) - _first);
-			_alloc.destroy(_first + pos);
-			_shift_left(pos + 1, 1);
+			_shift_to_left(pos, 1);
 			return (iterator(_first + pos));
 		}
 
 		iterator erase (iterator first, iterator last){
 			size_type pos = static_cast<size_type>(&(*first) - _first);
-			size_type dist = static_cast<size_type>(distance_iterator(first, last));
-
-			pointer tmp = &(*first);
-			pointer end_tmp = tmp + dist;
-			while(tmp != end_tmp){
-				_alloc.destroy(tmp);
-				tmp++;
-			}
-
-			_shift_left(pos + dist, dist);
+			size_type n = static_cast<size_type>(distance_iterator(first, last));
+			_shift_to_left(pos, n);
 			return (iterator(_first + pos));
 		}
 
@@ -310,13 +300,29 @@ namespace ft{
 						InputIterator
 				>::type last
 		){
-			_destroy_all();
-			insert(iterator(_first), first, last);
+			pointer tmp = _first;
+			while (tmp != _last && first != last){
+				(*tmp) = (*first);
+				++tmp;
+				++first;
+			}
+			if (first != last)
+				insert(iterator(_last), first, last);
+			else
+				erase(iterator(tmp), iterator(_last));
 		}
 
 		void assign (size_type n, const_reference val){
-			_destroy_all();
-			insert(iterator(_first), n, val);
+			pointer tmp = _first;
+			while (tmp != _last && n){
+				(*tmp) = val;
+				++tmp;
+				--n;
+			}
+			if (n)
+				insert(iterator(_last), n, val);
+			else
+				erase(iterator(tmp), iterator(_last));
 		}
 
 		/**
@@ -345,9 +351,9 @@ namespace ft{
 		 * @param x Another vector container of the same type (i.e., instantiated with the same template parameters, T and Alloc) whose content is swapped with that of this container.
 		 */
 		void swap (vector& x){
-			_swap_pointer(this->_first, x._first);
-			_swap_pointer(this->_last, x._last);
-			_swap_pointer(this->_last_max, x._last_max);
+			ft::swap(this->_first, x._first);
+			ft::swap(this->_last, x._last);
+			ft::swap(this->_last_max, x._last_max);
 		}
 
 		/**
@@ -388,7 +394,11 @@ namespace ft{
 		 * @return Returns the maximum number of elements that the vector can hold.
 		 */
 		size_type max_size() const _NOEXCEPT{
-			return _alloc.max_size();
+			size_type max_size_diff = std::numeric_limits<difference_type>::max();
+			size_type max_size_alloc = _alloc.max_size();
+			if (max_size_alloc < max_size_diff)
+				return (max_size_alloc);
+			return (max_size_diff);
 		}
 
 		/**
@@ -540,13 +550,13 @@ namespace ft{
 	 */
 	reference at (size_type n){
 		if (n >= size())
-			throw std::out_of_range("");
+			_throw_out_of_range(n);
 		return *(_first + n);
 	}
 
 	const_reference at (size_type n) const{
 		if (n >= size())
-			throw std::out_of_range("ft::vector");
+			_throw_out_of_range(n);
 		return *(_first + n);
 	}
 
@@ -625,50 +635,36 @@ namespace ft{
 		}
 
 		/**
-		 * @name __move_to
-		 * @brief move size objects from src to dist. the dist and src are in the same memory region (may overlap)
-		 */
-		void __move_to(pointer dist, pointer src, size_type size){
-			if (dist > src){
-				while (size--){
-					_alloc.construct(dist + size, *(src + size));
-					_alloc.destroy(src + size);
-				}
-			}else {
-				while (size--){
-					_alloc.destroy(dist);
-					_alloc.construct(dist, *src);
-					dist++;
-					src++;
-				}
-			}
-
-		}
-
-		void __copy_to(pointer arr2, pointer arr1, size_type size){
-			while (size--){
-				_alloc.construct(arr2++, *arr1);
-				_alloc.destroy(arr1++);
-			}
-		}
-
-		/**
 		 * @note @param pos must be in a valid range in the container
 		 * @brief add space to the container and shift elements from pos to the right by nb_shift
 		 * @param pos
 		 * @param nb_shift
 		 */
 		void _add_space(size_type pos, size_type nb_shift, size_type new_capacity){
+			if (new_capacity > max_size()){
+				_throw_max_size();
+			}
 			size_type capacity = this->capacity();
 			size_type size = this->size();
 			pointer new_arr = _alloc.allocate(new_capacity, _first);
 
 			//copy and shift
 			if (_first){
-				//std::memcpy(new_arr, _first, sizeof(value_type) * pos);
-				//std::memcpy(new_arr + pos + nb_shift, _first + pos, sizeof(value_type) * (size - pos));
-				__move_to(new_arr, _first, pos);
-				__move_to(new_arr + pos + nb_shift, _first + pos, (size - pos));
+				pointer dist = new_arr;
+				pointer src = _first;
+				while (pos--){
+					_alloc.construct(dist, *src);
+					_alloc.destroy(src);
+					++dist;
+					++src;
+				}
+				dist += nb_shift;
+				while (src != _last){
+					_alloc.construct(dist, *src);
+					_alloc.destroy(src);
+					++dist;
+					++src;
+				}
 				_alloc.deallocate(_first, capacity);
 			}
 
@@ -682,12 +678,35 @@ namespace ft{
 			_add_space(pos, nb_shift, __get_new_capacity(capacity() + nb_shift));
 		}
 
-		void _shift_right(size_type pos, size_type nb_shift){
-			pointer	dist = _first + pos + nb_shift;
-			pointer src = _first + pos;
-			//std::memmove(dist, src, sizeof(value_type) * (size() - pos));
-			__move_to(dist, src, (size() - pos));
-			_last += nb_shift;
+		bool _shift_to_right(size_type pos, size_type nb_shift){
+			if (__remains_space() < nb_shift){
+				_add_space(pos, nb_shift);
+				return (true);
+			}
+			else if (nb_shift){
+				size_type size_copy = this->size() - pos;
+				if (_first == _last || !size_copy){
+					_last += nb_shift;
+					return (false);
+				}
+				pointer src = _last - 1;
+				pointer dist = _last + nb_shift - 1;
+				_last += nb_shift;
+				while (nb_shift--){
+					_alloc.construct(dist, *src);
+					--size_copy;
+					if (!size_copy)
+						return (false);
+					--dist;
+					--src;
+				}
+				while (size_copy--){
+					(*dist) = (*src);
+					--dist;
+					--src;
+				}
+			}
+			return (false);
 		}
 
 		/**
@@ -696,13 +715,21 @@ namespace ft{
 		 * @param nb_shift the number by which the array defined as [pos, end) will be shift to the left, this will override the data in the left
 		 * @example [1, 2, 3, 4, 5] shift(2, 2) -> [3, 4, 5, 4, 5]
 		 */
-		void _shift_left(size_type pos, size_type nb_shift){
-			pointer	dist = _first + pos - nb_shift;
-			pointer src = _first + pos;
-			size_type nb_elem = static_cast<size_type>(_last - src);
-			std::memmove(dist, src, sizeof(value_type) * (nb_elem));
-			//__move_to(dist, src, (nb_elem));
+		void _shift_to_left(size_type pos, size_type nb_shift){
+			size_type nb_copy = _last - (_first + pos + nb_shift);
+			pointer	dist = _first + pos;
+			pointer src = _first + pos + nb_shift;
+
+			while (nb_copy--){
+				(*dist) = (*src);
+				++dist;
+				++src;
+			}
 			_last -= nb_shift;
+			while (nb_shift--){
+				_alloc.destroy(dist);
+				++dist;
+			}
 		}
 
 		void _destroy_all(){
@@ -714,14 +741,18 @@ namespace ft{
 			_last = _first;
 		}
 
-		void _swap_pointer(pointer a, pointer b){
-			pointer tmp = a;
-			a = b;
-			b = tmp;
+		size_type __remains_space(){
+			return (static_cast<size_type>(_last_max - _last));
 		}
 
-		size_type _remains_space(){
-			return (static_cast<size_type>(_last_max - _last));
+		void _throw_out_of_range(size_type n) const{
+			throw std::out_of_range(
+					std::string("Vector index out of range vector size is ") + ft::to_string(size()) +
+					std::string(" but got ") + ft::to_string(n) + std::string("."));
+		}
+
+		void _throw_max_size() const{
+			throw std::length_error("allocation exceeded the maximum allowed size.");
 		}
 
 #pragma endregion
@@ -781,6 +812,7 @@ namespace ft{
 		return (!operator<(lhs, rhs));
 	}
 
+	//TODO Why
 	template <class T, class Alloc>
 	void swap (vector<T,Alloc>& x, vector<T,Alloc>& y){
 		x.swap(y);

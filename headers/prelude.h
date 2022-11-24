@@ -5,7 +5,7 @@
 #ifndef FT_CONTAINERS_PRELUDE_H
 #define FT_CONTAINERS_PRELUDE_H
 
-#define NAMESPACE std
+#define NAMESPACE ft
 
 #include "track_alloc.hpp"
 

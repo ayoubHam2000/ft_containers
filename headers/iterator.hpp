@@ -157,6 +157,12 @@ namespace ft{
 
 		}
 
+		template <class Iter>
+		reverse_iterator &operator=(const reverse_iterator<Iter> &other){
+			current = other.base();
+			return (*this);
+		}
+
 		iterator_type base() const{
 			return (current);
 		}
@@ -245,22 +251,22 @@ namespace ft{
 
 	template <class Iterator1, class Iterator2>
 	bool operator<  (const reverse_iterator<Iterator1>& lhs, const reverse_iterator<Iterator2>& rhs){
-		return (lhs.base() < rhs.base());
-	}
-
-	template <class Iterator1, class Iterator2>
-	bool operator<= (const reverse_iterator<Iterator1>& lhs, const reverse_iterator<Iterator2>& rhs){
-		return (lhs.base() <= rhs.base());
-	}
-
-	template <class Iterator1, class Iterator2>
-	bool operator>  (const reverse_iterator<Iterator1>& lhs, const reverse_iterator<Iterator2>& rhs){
 		return (lhs.base() > rhs.base());
 	}
 
 	template <class Iterator1, class Iterator2>
-	bool operator>= (const reverse_iterator<Iterator1>& lhs, const reverse_iterator<Iterator2>& rhs){
+	bool operator<= (const reverse_iterator<Iterator1>& lhs, const reverse_iterator<Iterator2>& rhs){
 		return (lhs.base() >= rhs.base());
+	}
+
+	template <class Iterator1, class Iterator2>
+	bool operator>  (const reverse_iterator<Iterator1>& lhs, const reverse_iterator<Iterator2>& rhs){
+		return (lhs.base() < rhs.base());
+	}
+
+	template <class Iterator1, class Iterator2>
+	bool operator>= (const reverse_iterator<Iterator1>& lhs, const reverse_iterator<Iterator2>& rhs){
+		return (lhs.base() <= rhs.base());
 	}
 
 	template <class Iterator>
@@ -328,8 +334,8 @@ namespace ft{
 
 		}
 
-		//for const iterator that hold a const pointer to in object, an implicit conversion by the copy constructor happen
-		vector_iter &operator=(const vector_iter &other){
+		template <class Up>
+		vector_iter &operator=(const vector_iter<Up> &other){
 			this->ptr = other.base();
 			return (*this);
 		}

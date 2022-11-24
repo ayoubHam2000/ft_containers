@@ -127,6 +127,119 @@ namespace ft{
 			std::forward_iterator_tag,
 			!is_integral<_Type>::value> {};
 
+
+	template <class T>
+	std::string to_string(T n)
+	{
+		return std::to_string(n);
+	}
+
+	template <class T>
+	void swap(T &a, T &b){
+		T tmp = a;
+		a = b;
+		b = tmp;
+	}
+
+#pragma region pair
+	/*****************************************************************/
+	// pair
+	/*****************************************************************/
+
+	template <class T1, class T2>
+	struct pair
+	{
+		typedef T1 first_type;
+		typedef T2 second_type;
+
+		T1 first;
+		T2 second;
+
+		pair() : first(), second() {
+
+		}
+
+		pair(T1 const& t1, T2 const& t2) : first(t1), second(t2) {
+
+		}
+
+		//TODO Why it is a template
+		template <class U1, class U2>
+		pair(const pair<U1, U2> &p) : first(p.first), second(p.second) {
+
+		}
+
+		pair &operator=(pair const& p) {
+			first = p.first;
+			second = p.second;
+			return (*this);
+		}
+
+		void swap(pair& p) _NOEXCEPT
+		{
+			ft::swap(first, p.first);
+			ft::swap(second, p.second);
+		}
+
+	};
+
+
+	template <class _T1, class _T2>
+	bool operator==(const pair<_T1, _T2> &x, const pair<_T1, _T2> &y)
+	{
+		return (x.first == y.first && x.second == y.second);
+	}
+
+	template <class _T1, class _T2>
+	bool operator!=(const pair<_T1, _T2> &x, const pair<_T1, _T2> &y)
+	{
+		return (!(x == y));
+	}
+
+	template <class _T1, class _T2>
+	bool operator< (const pair<_T1, _T2> &x, const pair<_T1, _T2> &y)
+	{
+		return (x.first < y.first || (!(y.first < x.first) && x.second < y.second));
+	}
+
+	template <class _T1, class _T2>
+	bool operator> (const pair<_T1, _T2> &x, const pair<_T1, _T2> &y)
+	{
+		return (y < x);
+	}
+
+	template <class _T1, class _T2>
+	bool operator>=(const pair<_T1, _T2> &x, const pair<_T1, _T2> &y)
+	{
+		return (!(x < y));
+	}
+
+	template <class _T1, class _T2>
+	bool operator<=(const pair<_T1, _T2> &x, const pair<_T1, _T2> &y)
+	{
+		return (!(y < x));
+	}
+
+	//TODO __is_swappable
+	template <class _T1, class _T2>
+	typename enable_if
+			<
+					std::__is_swappable<_T1>::value &&
+					std::__is_swappable<_T2>::value,
+					void
+			>::type
+	swap(pair<_T1, _T2> &x, pair<_T1, _T2> &y) _NOEXCEPT
+	{
+		x.swap(y);
+	}
+
+	template <class _T1, class _T2>
+	pair<_T1, _T2> make_pair(_T1 x, _T2 y)
+	{
+		return pair<_T1, _T2>(x, y);
+	}
+
+#pragma endregion
 }
 
 #endif //FT_CONTAINERS_UTILS_HPP

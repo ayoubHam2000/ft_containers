@@ -54,6 +54,17 @@ namespace ft{
 	 * @param last2 Input iterators to the initial and final positions of the second
 	 * sequence. The range used is [first2,last2).
 	 */
+
+	template <class T1, class T2 = T1>
+	struct less
+	{
+		bool operator()(const T1 &x, const T1 &y) const {return x < y;}
+		bool operator()(const T1 &x, const T2 &y) const {return x < y;}
+		bool operator()(const T2 &x, const T1 &y) const {return x < y;}
+		bool operator()(const T2 &x, const T2 &y) const {return x < y;}
+	};
+
+	//TODO: test
 	template <class InputIterator1, class InputIterator2>
 	bool lexicographical_compare(
 			InputIterator1 first1,
@@ -61,16 +72,32 @@ namespace ft{
 			InputIterator2 first2,
 			InputIterator2 last2)
 	{
+		return lexicographical_compare(first1, last1, first2, last2,
+				ft::less<
+				        typename iterator_traits<InputIterator1>::value_type,
+						typename iterator_traits<InputIterator2>::value_type
+						>()
+				);
+	};
+
+	template <class _InputIterator1, class _InputIterator2, class _Compare>
+	bool lexicographical_compare(
+			_InputIterator1 first1,
+			_InputIterator1 last1,
+			_InputIterator2 first2,
+			_InputIterator2 last2,
+			_Compare comp)
+	{
 		while (first1 != last1) {
-			if (first2 == last2 || *first2 < *first1)
-				return false;
-			else if (*first1 < *first2)
-				return true;
+			if (first2 == last2 || comp(*first1, *first2))
+				return (true);
+			if (comp(*first2, *first1))
+				return (false);
 			++first1;
 			++first2;
 		}
-		return (first2 != last2);
-	};
+		return (false);
+	}
 }
 
 #endif //FT_CONTAINERS_ALGORITHM_HPP
