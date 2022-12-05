@@ -41,6 +41,11 @@ class track_allocator
 {
 public:
 	// clang-format off
+	static long long nb_allocate;
+	static long long nb_deallocate;
+	static long long nb_destroy;
+	static long long nb_construct;
+
 	typedef T              value_type;
 	typedef T*             pointer;
 	typedef const T*       const_pointer;
@@ -98,6 +103,7 @@ public:
 
 	T* allocate(std::size_t n, const void* hint = 0)
 	{
+		nb_allocate++;
 		T* block = std::allocator<T>().allocate(n, hint);
 		tracker.add_allocation((void*)block, n);
 		return block;
@@ -105,6 +111,7 @@ public:
 
 	void deallocate(T* p, std::size_t n)
 	{
+		nb_deallocate++;
 		if (p == NULL) {
 			std::cout << "Called deallocate on null" << std::endl;
 		}
@@ -131,6 +138,7 @@ public:
 
 	void construct(pointer p, const_reference val)
 	{
+		nb_construct++;
 		if (p == NULL) {
 			std::cout << "Called construct on null" << std::endl;
 		}
@@ -146,6 +154,7 @@ public:
 
 	void destroy(pointer p)
 	{
+		nb_destroy++;
 		if (p == NULL) {
 			std::cout << "Called destroy on null" << std::endl;
 		}
@@ -159,11 +168,28 @@ public:
 		std::allocator<T>().destroy(p);
 	}
 
+	static void print(){
+		std::cout << "nb_destroy = " << track_allocator::nb_destroy << std::endl;
+		std::cout << "nb_construct = " << track_allocator::nb_construct << std::endl;
+		std::cout << "nb_allocate = " << track_allocator::nb_allocate << std::endl;
+		std::cout << "nb_deallocate = " << track_allocator::nb_deallocate << std::endl;
+	}
+
+	static void reset(){
+		track_allocator::nb_allocate = 0;
+		track_allocator::nb_deallocate = 0;
+		track_allocator::nb_construct = 0;
+		track_allocator::nb_destroy = 0;
+	}
+
 private:
 	memory_tracker tracker;
 };
 
-
+template <class T> long long track_allocator<T>::nb_allocate = 0;
+template <class T> long long track_allocator<T>::nb_deallocate = 0;
+template <class T> long long track_allocator<T>::nb_construct = 0;
+template <class T> long long track_allocator<T>::nb_destroy = 0;
 
 
 

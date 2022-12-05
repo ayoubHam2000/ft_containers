@@ -459,11 +459,37 @@ namespace ft{
 		return (rev_it.base() + n);
 	}
 
+#pragma endregion
 
+#pragma region vector_iterator
+
+	//TODO: documentation
+	/*****************************************************************/
+	// vector_iter
+	/*****************************************************************/
+
+	template <class Tp, class _NodePtr, class _DiffType>
+	class  __tree_iterator
+	{
+		typedef __tree_node_types<_NodePtr>                     _NodeTypes;
+		typedef _NodePtr                                        __node_pointer;
+		typedef typename _NodeTypes::__node_base_pointer        __node_base_pointer;
+		typedef typename _NodeTypes::__end_node_pointer         __end_node_pointer;
+		typedef typename _NodeTypes::__iter_pointer             __iter_pointer;
+		typedef pointer_traits<__node_pointer> __pointer_traits;
+
+		__iter_pointer __ptr_;
+
+	public:
+		typedef bidirectional_iterator_tag                     iterator_category;
+		typedef Tp                                            value_type;
+		typedef _DiffType                                      difference_type;
+		typedef value_type&                                    reference;
+		typedef typename _NodeTypes::__node_value_type_pointer pointer;
 
 #pragma endregion
 
-}
+} //End namespace fd
 
 
 

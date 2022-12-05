@@ -39,3 +39,13 @@ as std::allocator<T> wouldn't model that concept.
 4. leaks
 5. destroy and construct
 6. assignment, copy, construction
+
+            std::__1::vector<int, std::__1::allocator<int> >::iterator vector<int, allocator<int> >::erase(std::__1::vector<int, std::__1::allocator<int> >::const_iterator __position) __attribute__((internal_linkage))             {
+                ((void)0);
+                std::__1::vector<int, std::__1::allocator<int> >::difference_type __ps = __position - this->cbegin();
+                std::__1::vector<int, std::__1::allocator<int> >::pointer __p = this->__begin_ + __ps;
+                this->__destruct_at_end(std::__1::move(__p + 1, this->__end_, __p));
+                this->__invalidate_iterators_past(__p - 1);
+                std::__1::vector<int, std::__1::allocator<int> >::iterator __r = this->__make_iter(__p);
+                return __r;
+            }

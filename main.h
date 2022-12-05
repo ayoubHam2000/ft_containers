@@ -18,6 +18,7 @@
 #include <sstream>
 #include <map>
 #include <set>
+#include <chrono>
 #include "headers/Tree.h"
 
 #define print_(x) cout << x << endl;
@@ -59,7 +60,88 @@ public:
 
 		return (*this);
 	}
+
+	static void print(){
+		cout << "nb_construct = " << A::nb_construct << endl;
+		cout << "nb_copy_construct = " << A::nb_copy_construct << endl;
+		cout << "nb_assigned = " << A::nb_assigned << endl;
+		cout << "nb_delete = " << A::nb_delete << endl;
+	}
+
+	static void reset(){
+		A::nb_assigned = 0;
+		A::nb_delete = 0;
+		A::nb_copy_construct = 0;
+		A::nb_construct = 0;
+	}
 };
+
+struct MyTimer{
+	typedef std::chrono::high_resolution_clock::time_point time_type;
+
+	time_type s;
+
+	MyTimer(){
+		s = std::chrono::high_resolution_clock::now();
+	}
+
+	void reset(){
+		s = std::chrono::high_resolution_clock::now();
+	}
+
+	void print_ms(){
+		time_type end = std::chrono::high_resolution_clock::now();
+		std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end - s).count() / 1000000 << "ms\n";
+	}
+
+	void print_us(){
+		time_type end = std::chrono::high_resolution_clock::now();
+		std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end - s).count() / 1000 << "ms\n";
+	}
+};
+
+
+void vector_test()
+{
+	int max = 10000;
+	{
+
+		std::vector<int, track_allocator<int> > v;
+
+		for (int i = 0; i < max; i++) {
+			v.push_back(i);
+		}
+		MyTimer timer;
+		while (!v.empty())
+			v.erase(v.begin());
+
+		timer.print_ms();
+
+		track_allocator<int>::print();
+		//A::print();
+	}
+
+	track_allocator<int>::reset();
+	A::reset();
+
+	{
+
+		ft::vector<int, track_allocator<int> > v;
+
+		for (int i = 0; i < max; i++) {
+			v.push_back(i);
+		}
+		MyTimer timer;
+		while (!v.empty()) {
+			v.erase(v.begin());
+		}
+
+		timer.print_ms();
+
+		track_allocator<int>::print();
+		//A::print();
+	}
+}
 
 long long A::nb_assigned = 0;
 long long A::nb_delete = 0;
