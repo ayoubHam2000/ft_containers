@@ -20,6 +20,7 @@
 #include <set>
 #include <chrono>
 #include "headers/Tree.h"
+#include "headers/map.h"
 
 #define print_(x) cout << x << endl;
 using namespace std;

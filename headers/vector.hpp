@@ -65,7 +65,7 @@ namespace ft{
 
 		/**
 		 * @brief Constructs a container with n elements. Each element is a copy of val.
-		 * @param n Initial container size (i.e., the number of elements in the container at construction).
+		 * @param n Initial container _size (i.e., the number of elements in the container at construction).
 		 * @param val Value to fill the container with. Each of the n elements in the container will be initialized to a copy of this value.
 		 * Member type value_type is the type of the elements in the container, defined in vector as an alias of its first template parameter (T).
 		 * @param alloc Allocator object.
@@ -290,7 +290,7 @@ namespace ft{
 		/**
 		 * @name assign
 		 * @brief Assigns new contents to the vector, replacing its current contents,
-		 * and modifying its size accordingly.
+		 * and modifying its _size accordingly.
 		 */
 		template <class InputIterator>
 		void assign (
@@ -335,7 +335,7 @@ namespace ft{
 
 		/**
 		 * @name pop_back
-		 * @brief Removes the last element in the vector, effectively reducing the container size by one.
+		 * @brief Removes the last element in the vector, effectively reducing the container _size by one.
 		 */
 		void pop_back(){
 			erase(iterator(_last - 1));
@@ -358,7 +358,7 @@ namespace ft{
 
 		/**
 		 * @name clear
-		 * @brief Removes all elements from the vector (which are destroyed), leaving the container with a size of 0.
+		 * @brief Removes all elements from the vector (which are destroyed), leaving the container with a _size of 0.
 		 * @detail A reallocation is not guaranteed to happen, and the vector capacity is not guaranteed to change due to calling this function. A typical alternative that forces a reallocation is to use swap
 		 */
 		void clear() _NOEXCEPT{
@@ -369,12 +369,12 @@ namespace ft{
 
 #pragma region capacity
 	/*****************************************************************/
-	// Capacity (size, capacity, max_size, resize, empty, reserve, shrink_to_fit) ✔
+	// Capacity (_size, capacity, max_size, resize, empty, reserve, shrink_to_fit) ✔
 	/*****************************************************************/
 
 		/**
-		 * @name size
-		 * @return Returns the size of the vector
+		 * @name _size
+		 * @return Returns the _size of the vector
 		 */
 
 		size_type size() const{
@@ -404,17 +404,17 @@ namespace ft{
 		/**
 		 * @brief Resizes the container so that it contains n elements.
 		 * @details
-		 * If n is smaller than the current container size, the content is reduced to its first n elements,
+		 * If n is smaller than the current container _size, the content is reduced to its first n elements,
 		 * 	removing those beyond (and destroying them).
-		 * If n is greater than the current container size, the content is expanded by inserting at the end
-		 * 	as many elements as needed to reach a size of n. If val is specified, the new elements are
+		 * If n is greater than the current container _size, the content is expanded by inserting at the end
+		 * 	as many elements as needed to reach a _size of n. If val is specified, the new elements are
 		 * 	initialized as copies of val, otherwise, they are value-initialized.
 		 * If n is also greater than the current container capacity, an automatic reallocation of the allocated
 		 * 	storage space takes place.
 		 * Notice that this function changes the actual content of the container by inserting or erasing elements from it.
-		 * @param n New container size, expressed in number of elements.
+		 * @param n New container _size, expressed in number of elements.
 		 * @param val Object whose content is copied to the added elements in case that n is greater than the current
-		 * container size. If not specified, the default constructor is used instead.
+		 * container _size. If not specified, the default constructor is used instead.
 		 */
 		void resize (size_type n, value_type val = value_type()){
 			if (n < size()){
@@ -439,7 +439,7 @@ namespace ft{
 		 * @details If n is greater than the current vector capacity,
 		 * the function causes the container to reallocate its storage increasing its capacity to n (or greater).
 		 * In all other cases, the function call does not cause a reallocation and the vector capacity is not affected.
-		 * This function has no effect on the vector size and cannot alter its elements.
+		 * This function has no effect on the vector _size and cannot alter its elements.
 		 * @param n Minimum capacity for the vector.
 		 */
 		void reserve (size_type n){
@@ -453,7 +453,7 @@ namespace ft{
 
 		/**
 		 * @name shrink_to_fit
-		 * @brief Requests the container to reduce its capacity to fit its size.
+		 * @brief Requests the container to reduce its capacity to fit its _size.
 		 */
 		void shrink_to_fit() _NOEXCEPT{
 			if (capacity() > size()){
@@ -545,7 +545,7 @@ namespace ft{
 	/**
 	 * @name at
 	 * @brief Returns a reference to the element at position n in the vector.
-	 * @details The function automatically checks whether n is within the bounds of valid elements in the vector, throwing an out_of_range exception if it is not (i.e., if n is greater than, or equal to, its size). This is in contrast with member operator[], that does not check against bounds.
+	 * @details The function automatically checks whether n is within the bounds of valid elements in the vector, throwing an out_of_range exception if it is not (i.e., if n is greater than, or equal to, its _size). This is in contrast with member operator[], that does not check against bounds.
 	 * @return The element at the specified position in the container.
 	 */
 	reference at (size_type n){
@@ -747,12 +747,12 @@ namespace ft{
 
 		void _throw_out_of_range(size_type n) const{
 			throw std::out_of_range(
-					std::string("Vector index out of range vector size is ") + ft::to_string(size()) +
+					std::string("Vector index out of range vector _size is ") + ft::to_string(size()) +
 					std::string(" but got ") + ft::to_string(n) + std::string("."));
 		}
 
 		void _throw_max_size() const{
-			throw std::length_error("allocation exceeded the maximum allowed size.");
+			throw std::length_error("allocation exceeded the maximum allowed _size.");
 		}
 
 #pragma endregion

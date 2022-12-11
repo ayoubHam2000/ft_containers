@@ -9,6 +9,13 @@
 #include <map>
 #include <set>
 
+namespace track_alloc{
+	long long nb_allocate = 0;
+	long long nb_deallocate = 0;
+	long long nb_destroy = 0;
+	long long nb_construct = 0;
+}
+
 enum dealloc_result {
 	DEALLOC_BAD_POINTER,
 	DEALLOC_BAD_SIZE,
@@ -45,6 +52,7 @@ public:
 	static long long nb_deallocate;
 	static long long nb_destroy;
 	static long long nb_construct;
+	int test;
 
 	typedef T              value_type;
 	typedef T*             pointer;
@@ -64,19 +72,27 @@ public:
 public:
 	track_allocator()
 	{
+		test = 2;
 	}
 
-	track_allocator(const track_allocator&)
+	track_allocator(const track_allocator& other)
 	{
+		test = other.test;
 	}
 
 	template <typename U>
-	track_allocator(const track_allocator<U>&)
+	track_allocator(const track_allocator<U>& other)
 	{
+		test = other.test;
 	}
 
 	~track_allocator()
 	{
+	}
+
+	track_allocator& operator=(const track_allocator& other){
+		test = other.test;
+		return (*this);
 	}
 
 public:
@@ -104,7 +120,13 @@ public:
 	T* allocate(std::size_t n, const void* hint = 0)
 	{
 		nb_allocate++;
+		track_alloc::nb_allocate++;
+
 		T* block = std::allocator<T>().allocate(n, hint);
+		if (test)
+			std::cout << "nice try!: "  << test << std::endl;
+		else
+			std::cout << "other result: " << test << std::endl;
 		tracker.add_allocation((void*)block, n);
 		return block;
 	}
@@ -112,6 +134,8 @@ public:
 	void deallocate(T* p, std::size_t n)
 	{
 		nb_deallocate++;
+		track_alloc::nb_deallocate++;
+
 		if (p == NULL) {
 			std::cout << "Called deallocate on null" << std::endl;
 		}
@@ -123,7 +147,7 @@ public:
 				std::cout << "Called deallocate on non-allocated address: " << p << std::endl;
 				break;
 			case DEALLOC_BAD_SIZE:
-				std::cout << "Called deallocate with wrong block size: " << n << " (expected "
+				std::cout << "Called deallocate with wrong block _size: " << n << " (expected "
 						  << tracker.block_size(p) << ")" << std::endl;
 				break;
 			default:;
@@ -139,6 +163,8 @@ public:
 	void construct(pointer p, const_reference val)
 	{
 		nb_construct++;
+		track_alloc::nb_construct++;
+
 		if (p == NULL) {
 			std::cout << "Called construct on null" << std::endl;
 		}
@@ -155,6 +181,8 @@ public:
 	void destroy(pointer p)
 	{
 		nb_destroy++;
+		track_alloc::nb_destroy++;
+
 		if (p == NULL) {
 			std::cout << "Called destroy on null" << std::endl;
 		}
@@ -173,6 +201,11 @@ public:
 		std::cout << "nb_construct = " << track_allocator::nb_construct << std::endl;
 		std::cout << "nb_allocate = " << track_allocator::nb_allocate << std::endl;
 		std::cout << "nb_deallocate = " << track_allocator::nb_deallocate << std::endl;
+
+		std::cout << "global nb_destroy = " << track_alloc::nb_destroy << std::endl;
+		std::cout << "global nb_construct = " << track_alloc::nb_construct << std::endl;
+		std::cout << "global nb_allocate = " << track_alloc::nb_allocate << std::endl;
+		std::cout << "global nb_deallocate = " << track_alloc::nb_deallocate << std::endl;
 	}
 
 	static void reset(){
@@ -180,6 +213,11 @@ public:
 		track_allocator::nb_deallocate = 0;
 		track_allocator::nb_construct = 0;
 		track_allocator::nb_destroy = 0;
+
+		track_alloc::nb_allocate = 0;
+		track_alloc::nb_deallocate = 0;
+		track_alloc::nb_construct = 0;
+		track_alloc::nb_destroy = 0;
 	}
 
 private:

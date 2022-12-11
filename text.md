@@ -2,7 +2,7 @@
 pointer allocate (size_type n, allocator<void>::const_pointer hint=0);
 
 Allocate block of storage
-Attempts to allocate a block of storage with a size large enough to contain n elements of member type value_type (an alias of the allocator's template parameter), and returns a pointer to the first element.
+Attempts to allocate a block of storage with a _size large enough to contain n elements of member type value_type (an alias of the allocator's template parameter), and returns a pointer to the first element.
 
 The storage is aligned appropriately for objects of type value_type, but they are not constructed.
 

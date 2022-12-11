@@ -45,7 +45,7 @@ namespace ft{
 		}
 
 		size_type size() const{
-			return (container.size());
+			return (container._size());
 		}
 
 		reference top(){
