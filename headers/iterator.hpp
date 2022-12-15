@@ -6,58 +6,10 @@
 #define FT_CONTAINERS_ITERATOR_H
 
 #include <iostream>
+#include "utils.hpp"
+#include "./type_traits.h"
 
 namespace ft {
-
-#pragma region iterator_traits
-
-	/*****************************************************************/
-	// iterator_traits
-	/*****************************************************************/
-
-	/**
-	 * @name iterator_traits
-	 * @brief Traits class defining properties of iterators.
-	 * @details Standard algorithms determine certain properties of the iterators passed to
-	 * them and the range they represent by using the members of the corresponding iterator_traits instantiation.
-	 * For every iterator type, a corresponding specialization of iterator_traits
-	 * class template shall be defined, with at least the following member types defined:
-	 * @param difference_type	Type to express the result of subtracting one iterator from another.
-	 * @param value_type	The type of the element the iterator can point to.
-	 * @param pointer	The type of a pointer to an element the iterator can point to.
-	 * @param reference	The type of a reference to an element the iterator can point to.
-	 * @param iterator_category (input_iterator_tag, output_iterator_tag, forward_iterator_tag, bidirectional_iterator_tag, random_access_iterator_tag)
-	 * The iterator_traits class template comes with a default definition that obtains these types from the iterator
-	 * type itself (see below). It is also specialized for pointers (T*) and pointers to const (const T*).
-	 * Note that any custom class will have a valid instantiation of iterator_traits if it publicly inherits the base class std::iterator.
-	 */
-	template<class Iterator>
-	struct iterator_traits {
-		typedef typename Iterator::difference_type difference_type;
-		typedef typename Iterator::value_type value_type;
-		typedef typename Iterator::pointer pointer;
-		typedef typename Iterator::reference reference;
-		typedef typename Iterator::iterator_category iterator_category;
-	};
-
-	template<class T>
-	struct iterator_traits<T *> {
-		typedef ptrdiff_t difference_type;
-		typedef T value_type;
-		typedef T *pointer;
-		typedef T &reference;
-		typedef std::random_access_iterator_tag iterator_category;
-	};
-
-	template<class T>
-	struct iterator_traits<const T *> {
-		typedef ptrdiff_t difference_type;
-		typedef T value_type;
-		typedef const T *pointer;
-		typedef const T &reference;
-		typedef std::random_access_iterator_tag iterator_category;
-	};
-#pragma endregion
 
 #pragma region iterator
 	/*****************************************************************/

@@ -8,6 +8,14 @@
 #include <iostream>
 #include "queue.h"
 
+//TODO remove it
+namespace std{
+	template <class _T1, class _T2>
+	string	to_string(const ft::pair<_T1, _T2> &data){
+		return ("(" + to_string(data.first) + ", " + to_string(data.second) + ")");
+	}
+}
+
 namespace ft{
 
 #pragma region Node
@@ -145,7 +153,7 @@ public:
 	/*****************************************************************/
 
 	//min child in the tree starting from the node
-	static nodePointer findMin(nodePointer node){
+	static nodePointer findMin(const nodePointer node){
 		if (!node)
 			return (nullptr);
 		if (node->leftChild == nullptr)
@@ -154,7 +162,7 @@ public:
 	}
 
 	//max child in the tree starting from the node
-	static nodePointer findMax(nodePointer node){
+	static nodePointer findMax(const nodePointer node){
 		if (!node)
 			return (nullptr);
 		if (node->rightChild == nullptr)
@@ -173,11 +181,11 @@ public:
 	/*****************************************************************/
 
 	template <class Tp, class NodePtr, class DiffType>
-	class  tree_iterator : public iterator<std::bidirectional_iterator_tag, Tp>
+	class  tree_iterator : public iterator<std::bidirectional_iterator_tag, Tp, DiffType>
 	{
-		typedef iterator<std::bidirectional_iterator_tag, Tp>	_base;
-		//typedef NodePtr											node_pointer;
-		typedef BinaryNode<Tp>*									node_pointer;
+		typedef iterator<std::bidirectional_iterator_tag, Tp, DiffType>	_base;
+		typedef BinaryNode<Tp>											node_type;
+		typedef node_type*												node_pointer;
 
 	public:
 		typedef typename _base::iterator_category 				iterator_category;
@@ -186,25 +194,26 @@ public:
 		typedef typename _base::reference 						reference;
 		typedef typename _base::pointer 						pointer;
 
+
 	private:
 		node_pointer											ptr;
-		node_pointer											root;
+		const node_pointer* 									root;
 
 	public:
 		tree_iterator() : ptr(nullptr), root(nullptr) {}
 
-		tree_iterator(node_pointer node, node_pointer root, node_pointer end) : ptr(node), root(root) {}
+		tree_iterator(const node_pointer node, const node_pointer* root) : ptr(node), root(root) {}
 
 
 		tree_iterator(const tree_iterator &other):
-				ptr(other.ptr),
-				root(other.root)
+			ptr(other.ptr),
+			root(other.root)
 		{}
 
 		template<class Up>
 		tree_iterator(const tree_iterator<Up, NodePtr, DiffType> &other):
-		ptr(other.base()),
-		root(other.getBegin())
+			ptr(other.base()),
+			root(other.getRoot())
 		{}
 
 
@@ -227,7 +236,7 @@ public:
 			return (ptr);
 		}
 
-		node_pointer getRoot() const {
+		node_pointer* getRoot() const {
 			return (root);
 		}
 
@@ -249,7 +258,7 @@ public:
 
 		tree_iterator &operator--() {
 			if (ptr == nullptr)
-				ptr = BinaryNode<Tp>::findMax(root);
+				ptr = BinaryNode<Tp>::findMax(*root);
 			else
 				ptr = ptr->smaller();
 			return (*this);
@@ -258,7 +267,7 @@ public:
 		tree_iterator operator--(int) {
 			tree_iterator _tmp(*this);
 			if (ptr == nullptr)
-				ptr = BinaryNode<Tp>::findMax(root);
+				ptr = BinaryNode<Tp>::findMax(*root);
 			else
 				ptr = ptr->smaller();
 			return (_tmp);
@@ -269,7 +278,7 @@ public:
 		// other
 		//////////////////////////
 
-		node_pointer operator->() const {
+		pointer operator->() const {
 			return (&(operator*()));
 		}
 
@@ -281,49 +290,51 @@ public:
 
 	template<class Iterator_1, class Iterator_2, class NodePtr, class DiffType>
 	bool operator==(const tree_iterator<Iterator_1, NodePtr, DiffType> &lhs, const tree_iterator<Iterator_2, NodePtr, DiffType> &rhs) {
-		return (lhs.base()->data == rhs.base()->data);
+		return (lhs.base() == rhs.base());
 	}
 
 	template<class Iterator_1, class Iterator_2, class NodePtr, class DiffType>
 	bool operator!=(const tree_iterator<Iterator_1, NodePtr, DiffType> &lhs, const tree_iterator<Iterator_2, NodePtr, DiffType> &rhs) {
-		return (lhs.base()->data != rhs.base()->data);
+		return (lhs.base() != rhs.base());
 	}
 
 #pragma endregion
 
 #pragma region BinaryTree
 
-//true if T is ft::pair
-template <class T, class Compare, bool>
-struct tree_comparator{
-	bool operator()(Compare &cmp, const T& x, const T& y){
-		return (cmp(x, y));
+//Todo: Remove it
+template <class T, class key_compare>
+struct Tree_comparator{
+	Tree_comparator(const key_compare &comp = key_compare()): comp(comp)  {}
+	Tree_comparator(const Tree_comparator &other): comp(other.comp)  {}
+	Tree_comparator& operator=(const Tree_comparator &other){
+		comp = other.comp;
+		return (*this);
 	}
-};
-
-template <class T, class Compare>
-struct tree_comparator<T, Compare, true>{
-	bool operator()(Compare &cmp, const T& x, const T& y){
-		return (cmp(x.first, y.first));
+	~Tree_comparator(){};
+	bool operator()(const T& x, const T& y) const{
+		return (comp(x.first, y.first));
 	}
+private:
+	key_compare comp;
 };
 
 template <
         class T,
 		class Compare,
-		class Allocator,
-		class NodeType
+		class Allocator
 		>
 class BinaryTree{
 
 protected:
-	typedef NodeType													nodeType;
+	typedef BinaryNode<T>												nodeType;
 	typedef nodeType *													nodePointer;
 	typedef const nodeType *											constNodePointer;
 
 public:
 	typedef T                                      						value_type;
-	typedef Compare                                 					value_compare;
+	typedef Tree_comparator<T, Compare>                      			value_compare;
+	//Compare                      										value_compare;
 	typedef Allocator                               					allocator_type;
 	typedef typename Allocator::template rebind<nodeType>::other    	node_allocator_type;
 	typedef typename allocator_type::size_type							size_type;
@@ -351,6 +362,20 @@ public:
 			   ) : _parent(nullptr), _comp(comp), _node_alloc(node_alloc), _size(0)
    {}
 
+	template <class InputIterator>
+	BinaryTree (
+		InputIterator first,
+		typename enable_if<
+				ft::is_valid_input_iterator<value_type, InputIterator>::value,
+				InputIterator
+		>::type last,
+		const value_compare& comp = value_compare(),
+		const allocator_type& node_alloc = allocator_type()
+	) : _parent(nullptr), _comp(comp), _node_alloc(node_alloc), _size(0)
+	{
+		insert(first, last);
+	}
+
    BinaryTree(const BinaryTree &other) :
    			_parent(_clone(other._parent, nullptr)),
 		   _comp(other._comp),
@@ -365,6 +390,7 @@ public:
 		this->_node_alloc = tmp._node_alloc;
 		this->_comp = tmp._comp;
 		this->_size = tmp._size;
+		tmp._parent = nullptr;
 		return (*this);
 	}
 
@@ -405,21 +431,73 @@ public:
 		return (nodeType::findMax(_parent));
 	}
 
+	//==========================================
+	//iterator
+	//==========================================
+
 	iterator begin() _NOEXCEPT{
-		return iterator (findMin(), _parent);
+		return iterator (findMin(), &_parent);
 	}
 
 	const_iterator begin() const _NOEXCEPT{
-		return const_iterator (findMin(), _parent);
+		return const_iterator (findMin(), &_parent);
 	}
 
-	//TODO : make the end Iterator
 	iterator end() _NOEXCEPT{
-		return iterator (findMax(), _parent);;
+		return iterator (findMax()->greater(), &_parent);;
 	}
 
 	const_iterator end() const _NOEXCEPT{
-		return const_iterator (findMax(), _parent);;
+		return const_iterator (findMax()->greater(), &_parent);;
+	}
+
+	iterator	find(const_reference value) const {
+		return iterator(findNode(value), &(_parent));
+	}
+
+	iterator lower_bound (const_reference value){
+		return (iterator(lower_bound(_parent, value), &_parent));
+	}
+
+	const_iterator lower_bound (const_reference value) const{
+		return (const_iterator(lower_bound(_parent, value), &_parent));
+	}
+
+	iterator upper_bound (const_reference value){
+		return (iterator(upper_bound(_parent, value), &_parent));
+	}
+
+	const_iterator upper_bound (const_reference value) const{
+		return (const_iterator(upper_bound(_parent, value), &_parent));
+	}
+
+	//==========================================
+	//iterator
+	//==========================================
+
+	nodePointer	lower_bound(nodePointer root, const_reference value) const{
+		nodePointer prev = nullptr;
+
+		while (root)
+		{
+			if (_comp(value, root->data))
+				prev = root;
+			if (_comp(root->data, value)){
+				root = root->rightChild;
+			} else if (_comp(value, root->data)){
+				root = root->leftChild;
+			} else {
+				return (root);
+			}
+		}
+		return (prev);
+	}
+
+	nodePointer	upper_bound(nodePointer root, const_reference value) const{
+		nodePointer lower = lower_bound(root, value);
+		if (!_comp(value, lower->data) && !_comp(lower->data, value))
+			return (lower->greater());
+		return (lower);
 	}
 
 	size_type size() const{
@@ -438,23 +516,19 @@ public:
 		return (_size == 0);
 	}
 
-	nodePointer findNode(nodePointer node, const_reference value){
+	nodePointer findNode(nodePointer node, const_reference value) const {
 		if (!node)
 			return (nullptr);
-		else if (_comp(node->data, value))
-			return (findNode(node->leftChild));
-		else if (_comp(value, node->data))
-			return (findNode(node->rightChild));
+		else if (this->_comp(node->data, value))
+			return (findNode(node->rightChild, value));
+		else if (this->_comp(value, node->data))
+			return (findNode(node->leftChild, value));
 		else
 			return (node);
 	}
 
-	nodePointer findNode(const_reference value){
+	nodePointer findNode(const_reference value) const {
 		return (this->findNode(_parent, value));
-	}
-
-	reference get(const_reference value){
-		return (findNode(value)->data);
 	}
 
 	void	print_center(std::ostream &os, const std::string &item, size_type buffer_size, int color){
@@ -507,10 +581,11 @@ public:
 	void 	printTree(nodeType *node, std::ostream &os, size_t tree_height){
 		size_type level_item = tree_height;
 		size_type buffer_size = 1;
+		size_type item_len = 4;
 		while (level_item--){
 			buffer_size *= 2;
 		}
-		buffer_size = 2 * buffer_size;
+		buffer_size = item_len * buffer_size;
 
 		size_type level = 1;
 		size_type depth = 0;
@@ -564,20 +639,69 @@ public:
 			printTree(this->_parent, os, h);
 	}
 
-	virtual void insert(const_reference value) = 0;
+	void swap(BinaryTree &x){
+		ft::swap(x._parent, _parent);
+		ft::swap(x._size, _size);
+	}
 
-	virtual void remove(const_reference value) = 0;
+	void clear(){
+		this->_destroyTree(_parent);
+	}
+
+	template <class InputIterator>
+	void insert(
+			InputIterator first,
+			typename enable_if<
+					ft::is_valid_input_iterator<value_type, InputIterator>::value,
+					InputIterator
+			>::type last
+	)
+	{
+		InputIterator	tmp = first;
+		while (tmp != last){
+			insert(*tmp);
+			++tmp;
+		}
+	}
+
+	template <class InputIterator>
+	void remove(
+			InputIterator first,
+			typename enable_if<
+					ft::is_valid_input_iterator<value_type, InputIterator>::value,
+					InputIterator
+			>::type last
+	)
+	{
+		InputIterator	tmp = first;
+		while (tmp != last){
+			remove(*tmp++);
+		}
+	}
+
+	virtual void insert(const_reference value){}
+
+	virtual void remove(const_reference value){}
 
 protected:
-	nodePointer	constructNode(const_reference value, nodePointer parent = nullptr){
+	nodePointer	constructNode(const_reference value, const nodePointer parent = nullptr){
 		nodePointer node = this->_node_alloc.allocate(1, nullptr);
 		this->_node_alloc.construct(node, nodeType(value, parent));
+		this->_size++;
+		return (node);
+	}
+
+	nodePointer constructNode(const nodePointer other){
+		nodePointer node = this->_node_alloc.allocate(1, nullptr);
+		this->_node_alloc.construct(node, nodeType(*other));
+		this->_size++;
 		return (node);
 	}
 
 	void deleteNode(nodePointer node){
 		this->_node_alloc.destroy(node);
 		this->_node_alloc.deallocate(node, 1);
+		_size--;
 	}
 
 	/**
@@ -674,15 +798,10 @@ private:
 	nodePointer _clone(nodePointer node, nodePointer parent){
 		if (!node)
 			return (nullptr);
-		nodePointer tmp = _node_alloc.allocate(1);
-		_node_alloc.construct(
-				tmp,
-				nodeType(node->data,
-						 parent,
-						 _clone(node->leftChild, tmp),
-						 _clone(node->rightChild, tmp)
-				)
-		);
+		nodePointer tmp = this->constructNode(node);
+		tmp->leftChild = _clone(node->leftChild, tmp);
+		tmp->rightChild = _clone(node->rightChild, tmp);
+		tmp->parent = parent;
 		return (tmp);
 	}
 
@@ -690,8 +809,7 @@ private:
 		if (node){
 			_destroyTree(node->leftChild);
 			_destroyTree(node->rightChild);
-			_node_alloc.destroy(node);
-			_node_alloc.deallocate(node, 1);
+			this->deleteNode(node);
 			node = nullptr;
 		}
 	}
@@ -708,11 +826,11 @@ template <
 		class Compare,
 		class Allocator
 		>
-class BinarySearchTree: public BinaryTree<T, Compare, Allocator, BinaryNode<T> >{
+class BinarySearchTree: public BinaryTree<T, Compare, Allocator >{
 
 
 private:
-	typedef BinaryTree<T, Compare, Allocator, BinaryNode<T> >	_base;
+	typedef BinaryTree<T, Compare, Allocator >	_base;
 protected:
 	typedef typename _base::nodeType 						nodeType;
 	typedef typename _base::nodePointer 					nodePointer;
@@ -722,13 +840,34 @@ public:
 	typedef typename _base::allocator_type                  allocator_type;
 	typedef typename _base::reference						reference;
 	typedef typename _base::const_reference					const_reference;
-
+public:
+	using _base::insert;
+	using _base::remove;
 public:
 	/*****************************************************************/
 	// Constructors
 	/*****************************************************************/
 
-	BinarySearchTree() : _base() {}
+	explicit BinarySearchTree(
+			const value_compare& comp = value_compare(),
+			const allocator_type& node_alloc = allocator_type()
+	) : _base(comp, node_alloc)
+	{}
+
+	template <class InputIterator>
+	BinarySearchTree (
+			InputIterator first,
+			typename enable_if<
+					ft::is_valid_input_iterator<value_type, InputIterator>::value,
+					InputIterator
+			>::type last,
+			const value_compare& comp = value_compare(),
+			const allocator_type& node_alloc = allocator_type()
+	) : _base(comp, node_alloc)
+	{
+		this->insertInto(first, last);
+	}
+
 	BinarySearchTree(const BinarySearchTree &other) : _base(other) {}
 	BinarySearchTree &operator=(const BinarySearchTree &other){
 		_base::operator=(other);
@@ -739,12 +878,10 @@ public:
 public:
 
 	virtual void insert(const_reference value){
-		this->_size++;
 		insertInto(this->_parent, value);
 	}
 
 	virtual void remove(const_reference value){
-		this->_size--;
 		this->removeFrom(this->_parent, value);
 	}
 
@@ -808,7 +945,7 @@ class AVLTree : public BinarySearchTree<T, Compare, Allocator>
 {
 
 private:
-	typedef BinarySearchTree<T, Compare, Allocator>			_base;
+	typedef BinarySearchTree<T, Compare, Allocator>	_base;
 protected:
 	typedef typename _base::nodeType 						nodeType;
 	typedef typename _base::nodePointer 					nodePointer;
@@ -818,13 +955,34 @@ public:
 	typedef typename _base::allocator_type                  allocator_type;
 	typedef typename _base::reference						reference;
 	typedef typename _base::const_reference					const_reference;
+public:
+	using _base::insert;
 
 public:
 	/*****************************************************************/
 	// Constructors
 	/*****************************************************************/
 
-	AVLTree() : _base() {}
+	AVLTree(
+			const value_compare& comp = value_compare(),
+			const allocator_type& node_alloc = allocator_type()
+	) : _base(comp, node_alloc)
+	{}
+
+	template <class InputIterator>
+	AVLTree (
+			InputIterator first,
+			typename enable_if<
+					ft::is_valid_input_iterator<value_type, InputIterator>::value,
+					InputIterator
+			>::type last,
+			const value_compare& comp = value_compare(),
+			const allocator_type& node_alloc = allocator_type()
+	) : _base(comp, node_alloc)
+	{
+		this->insertInto(first, last);
+	}
+
 	AVLTree(const AVLTree &other) : _base(other) {}
 	AVLTree &operator=(const AVLTree &other){
 		_base::operator=(other);
@@ -871,9 +1029,9 @@ template <
 		class Compare,
 		class Allocator
 		>
-class RedBlackTree : public BinaryTree<T, Compare, Allocator, BinaryNode<T> >{
+class RedBlackTree : public BinaryTree<T, Compare, Allocator >{
 private:
-	typedef BinaryTree<T, Compare, Allocator, BinaryNode<T> >	_base;
+	typedef BinaryTree<T, Compare, Allocator >		_base;
 public:
 	typedef typename _base::nodeType 						nodeType;
 	typedef typename _base::nodePointer 					nodePointer;
@@ -883,13 +1041,35 @@ public:
 	typedef typename _base::allocator_type                  allocator_type;
 	typedef typename _base::reference						reference;
 	typedef typename _base::const_reference					const_reference;
+public:
+	using _base::insert;
+	using _base::remove;
 
 public:
 	/*****************************************************************/
 	// Constructors
 	/*****************************************************************/
 
-	RedBlackTree() : _base() {}
+	RedBlackTree(
+			const value_compare& comp = value_compare(),
+			const allocator_type& node_alloc = allocator_type()
+	) : _base(comp, node_alloc)
+	{}
+
+	template <class InputIterator>
+	RedBlackTree (
+		InputIterator first,
+		typename enable_if<
+			ft::is_valid_input_iterator<value_type, InputIterator>::value,
+			InputIterator
+			>::type last,
+		const value_compare& comp = value_compare(),
+		const allocator_type& node_alloc = allocator_type()
+	) : _base(comp, node_alloc)
+	{
+		this->insert(first, last);
+	}
+
 	RedBlackTree(const RedBlackTree(&other)) : _base(other) {}
 	RedBlackTree &operator=(const RedBlackTree(&other)){
 		_base::operator=(other);
@@ -904,12 +1084,31 @@ public:
 	/*****************************************************************/
 
 	virtual void insert(const_reference value){
-		this->_size++;
 		_insertInto(this->_parent, value);
 	}
 
+	/**
+	 * @details
+	 * the rule of the while is to find the right parent
+	 * where we can insert the value,
+	 * because the value can be larger than the grandparent (if it exist)
+	 * pre-requisite root should be != null
+	 */
+	void insert(nodePointer root, const_reference value){
+		nodePointer parent;
+
+		while (this->_comp(root->data, value)){
+			parent = root->parent;
+			if (parent && this->_comp(parent->data, value))
+				root = parent;
+			else
+				break;
+		}
+		nodePointer &ref = root->getRef(this->_parent);
+		_insertInto(ref, value);
+	}
+
 	virtual void remove(const_reference value){
-		this->_size--;
 		_removeFrom(this->_parent, value);
 	}
 
@@ -999,16 +1198,15 @@ private:
 		}
 		if (node){
 			oldColor = node->color;
+			isLeftChild = (node->parent && node->parent->leftChild == node);
 			if (!node->leftChild){
 				x = node->rightChild;
 				this->Transplant(node, node->rightChild);
 				xParent = node->parent;
-				isLeftChild = 0;
 			}else if (!node->rightChild){
 				x = node->leftChild;
 				this->Transplant(node, node->leftChild);
 				xParent = node->parent;
-				isLeftChild = 1;
 			}else{
 				y = this->findMin(node->rightChild);
 				oldColor = y->color;
@@ -1119,7 +1317,9 @@ private:
 		x->color = nodeType::BLACK;
 	}
 
+
 }; //End RedBlackTree
+
 #pragma endregion
 
 } //End NameSpace

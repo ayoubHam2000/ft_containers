@@ -6,59 +6,11 @@
 #define FT_CONTAINERS_UTILS_HPP
 
 #include <iostream>
+#include "./type_traits.h"
 
 namespace ft{
 
-	/**
-	 * @name enable_if
-	 * @brief an implementation of std::enable_if : it has a public member typedef type if B is true, otherwise there is no member type
-	 * @tparam B
-	 */
-	template <bool B, class T = void>
-	struct enable_if{};
 
-	template <class T>
-	struct enable_if<true, T>{
-		typedef T type;
-	};
-
-
-	/**
-	 * @name false_type
-	 * @brief has a member value = false
-	 */
-	struct false_type {
-		static const bool value = false;
-	};
-
-	/**
-	 * @name false_type
-	 * @brief has a member value = true
-	 */
-	struct true_type {
-		static const bool value = true;
-	};
-
-	/**
-	 * @name is_integral
-	 * @brief has a member value = true if @tparam T is integral
-	 */
-	template <class T> struct is_integral : public false_type {};
-	template <> struct is_integral<bool> : public true_type {};
-	template <> struct is_integral<char> : public true_type {};
-	template <> struct is_integral<signed char > : public true_type {};
-	template <> struct is_integral<unsigned char> : public true_type {};
-	template <> struct is_integral<wchar_t> : public true_type {};
-	template <> struct is_integral<char16_t> : public true_type {};
-	template <> struct is_integral<char32_t> : public true_type {};
-	template <> struct is_integral<short> : public true_type {};
-	template <> struct is_integral<unsigned short> : public true_type {};
-	template <> struct is_integral<int> : public true_type {};
-	template <> struct is_integral<unsigned int> : public true_type {};
-	template <> struct is_integral<long> : public true_type {};
-	template <> struct is_integral<unsigned long> : public true_type {};
-	template <> struct is_integral<long long> : public true_type {};
-	template <> struct is_integral<unsigned long long> : public true_type {};
 
 	/**
 	 * @name distance_iterator
@@ -100,32 +52,9 @@ namespace ft{
 
 	//=============================
 
-	template <class _ValueType, class _Type, class _To, bool>
-	struct __is_valid_iterator{
-		static const bool value =
-				std::is_convertible<typename iterator_traits<_Type>::iterator_category, _To>::value &&
-						std::is_constructible<_ValueType, typename iterator_traits<_Type>::reference>::value;
-	};
 
-	template <class _ValueType, class _Type, class _To>
-	struct __is_valid_iterator<_ValueType, _Type, _To, false> : public false_type {};
 
-	//
-	template <class _ValueType, class _Type>
-	struct is_valid_input_iterator :
-			public __is_valid_iterator<
-			_ValueType,
-			_Type,
-			std::input_iterator_tag,
-			!is_integral<_Type>::value> {};
 
-	template <class _ValueType, class _Type>
-	struct is_valid_forward_iterator :
-			public __is_valid_iterator<
-			_ValueType,
-			_Type,
-			std::forward_iterator_tag,
-			!is_integral<_Type>::value> {};
 
 
 	template <class T>
@@ -237,6 +166,13 @@ namespace ft{
 	pair<_T1, _T2> make_pair(_T1 x, _T2 y)
 	{
 		return pair<_T1, _T2>(x, y);
+	}
+
+	//TODO remove it
+	template <class _T1, class _T2>
+	std::ostream &operator<<(std::ostream &os, const pair<_T1, _T2> &data){
+		os << "(" << data.first << ", " << data.second << ")";
+		return (os);
 	}
 
 #pragma endregion
