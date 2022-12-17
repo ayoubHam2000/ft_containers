@@ -80,6 +80,171 @@ void	testIterator(){
 	a.print();*/
 }
 
+#define NS std
+void testErase(){
+	typedef ft::RedBlackTree<ft::pair<const int, int>, std::less<int>, std::allocator<ft::pair<const int, int> > > RBTree;
+	typedef std::map<int, int, std::less<int>, std::allocator<std::pair<const int, int> > > map_type;
+	typedef std::map<int, int, std::less<int>, std::allocator<std::pair<const int, int> > > my_map;
+	//typedef ft::map<int, int, std::less<int>, std::allocator<ft::pair<const int, int> > > my_map;
+
+	int arr[] = {16, 2, 9, 4, 15, 5, 8, 6, 13, 12, 3, 7, 10, 14, 11, 1};
+
+
+	NS::pair<int, int> map_arr[] = {
+			NS::make_pair(16, 4),
+			NS::make_pair(2, 4),
+			NS::make_pair(9, 5),
+			NS::make_pair(4, 5),
+			NS::make_pair(15, 5),
+			NS::make_pair(8, 5),
+			NS::make_pair(6, 5)
+	};
+
+
+	my_map::iterator iter_b, iter_e;
+	my_map  a(map_arr, map_arr + 6);
+	//a.print();
+
+	iter_b = a.begin();
+	iter_e = a.end();
+
+	iter_b = a.find(4);
+	a.erase(4);
+	cout << iter_b->first << endl;
+	/*for (my_map::iterator i = iter_b; i != iter_e; ++i){
+		my_map::value_type data = *i;
+		cout << a.size() << " delete: " << data << endl;
+		a.erase(i);
+		cout << a.size() << " deleted: " << data << endl;
+		a.print();
+	}*/
+
+}
+
+
+void terminator(){
+	SETUP_ARRAYS();
+
+	{
+		strmap m(strstr_arr, strstr_arr + strstr_size);
+
+		strmap::iterator it = m.find("ABCD");
+
+		if (it != m.end()) {
+			PRINT_PAIR_REF(*it);
+		}
+
+		m.insert(NAMESPACE::make_pair("12345", "etsriueruy394w"));
+		m.insert(NAMESPACE::make_pair("abcd", "sfdge4ta4tqtawefa"));
+		m.insert(NAMESPACE::make_pair("123", "adfgagrawetawtawef"));
+		m.insert(NAMESPACE::make_pair("1234", "asdfgaetfawfasdf"));
+		m.insert(NAMESPACE::make_pair("ab", "adfawtawefgzsdfg"));
+		m.insert(NAMESPACE::make_pair("yz", "gftrjr5y4agwe3ta"));
+		m.insert(NAMESPACE::make_pair("64", "mhj,i;y9o67eysetrgerg"));
+
+		it = m.find("12345");
+
+		if (it != m.end()) {
+			PRINT_PAIR_REF(*it);
+		}
+
+		it = m.find("1234");
+
+		if (it != m.end()) {
+			PRINT_PAIR_REF(*it);
+		}
+
+		it = m.find("123");
+
+		if (it != m.end()) {
+			PRINT_PAIR_REF(*it);
+		}
+
+		it = m.find("123");
+
+		if (it != m.end()) {
+			PRINT_PAIR_REF(*it);
+		}
+
+		it = m.find("z");
+
+		if (it != m.end()) {
+			PRINT_PAIR_REF(*it);
+		}
+
+		const strmap cm(m);
+
+		strmap::const_iterator cit = cm.find("ABCD");
+
+		if (cit != cm.end()) {
+			PRINT_PAIR_REF(*cit);
+		}
+
+		cit = cm.find("64");
+
+		if (cit != cm.end()) {
+			PRINT_PAIR_REF(*cit);
+		}
+
+		cit = m.find("12345");
+
+		if (cit != m.end()) {
+			PRINT_PAIR_REF(*cit);
+		}
+
+		cit = m.find("1234");
+
+		if (cit != m.end()) {
+			PRINT_PAIR_REF(*cit);
+		}
+
+		int *b = nullptr;
+		const int * a = b;
+
+		cit = m.find("123");
+
+		if (cit != m.end()) {
+			PRINT_PAIR_REF(*cit);
+		}
+
+		cit = m.find("123");
+
+		if (cit != m.end()) {
+			PRINT_PAIR_REF(*cit);
+		}
+
+		cit = m.find("z");
+
+		if (cit != m.end()) {
+			PRINT_PAIR_REF(*cit);
+		}
+
+	}
+
+	{
+		const intmap cm;
+
+		if (cm.find(0) != cm.end()) {
+			PRINT_PAIR_PTR(cm.find(0));
+		}
+
+		intmap m;
+
+		m.insert(NAMESPACE::make_pair(123, "Hello"));
+
+		if (m.find(0) != m.end()) {
+			PRINT_PAIR_PTR(m.find(0));
+		}
+		if (m.find(123) != m.end()) {
+			PRINT_PAIR_PTR(m.find(123));
+		}
+	}
+
+}
+
+
+
+
 
 int main()
 {
@@ -87,7 +252,26 @@ int main()
 	//testBinary();
 	//testAVL();
 	//readBlackTree();
-	testIterator();
+	//testIterator();
+	//testErase();
+
+	//terminator();
+
+	std::map<int, int> a;
+
+	for (int i = 0; i < 100; i++)
+		a[i] = i * 2;
+	std::map<int, int>::iterator iter1;
+	std::map<int, int>::iterator iter2;
+	iter1 = a.end();
+	--iter1;
+	iter2 = a.end();
+	a.erase(iter1);
+	iter2--;
+	cout << iter2->first << endl;
+
+
+
 
 	//std::map<int, int, std::less<int>, std::allocator<ft::pair<const int, int> > > b;
 

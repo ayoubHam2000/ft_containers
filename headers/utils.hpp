@@ -6,7 +6,7 @@
 #define FT_CONTAINERS_UTILS_HPP
 
 #include <iostream>
-#include "./type_traits.h"
+#include "./type_traits.hpp"
 
 namespace ft{
 

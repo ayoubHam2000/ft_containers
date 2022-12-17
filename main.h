@@ -12,15 +12,19 @@
 #include <list>
 #include <stdlib.h>
 //#include "headers/vector_prelude.h"
-#include "headers/vector_prelude_ben.h"
+//#include "headers/vector_prelude_ben.h"
+
+#include "headers/prelude.h"
+#include "headers/map_prelude.h"
+
 #include "headers/test.hpp"
 #include <stack>
 #include <sstream>
 #include <map>
 #include <set>
 #include <chrono>
-#include "headers/Tree.h"
-#include "headers/map.h"
+#include "headers/Tree.hpp"
+#include "headers/map.hpp"
 
 #define print_(x) cout << x << endl;
 using namespace std;

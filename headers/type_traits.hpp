@@ -2,8 +2,8 @@
 /*     created by aben-ham 12/14/22         */
 /*******************************************/
 
-#ifndef FT_CONTAINERS_TYPE_TRAITS_H
-#define FT_CONTAINERS_TYPE_TRAITS_H
+#ifndef FT_CONTAINERS_TYPE_TRAITS_HPP
+#define FT_CONTAINERS_TYPE_TRAITS_HPP
 
 #include <iostream>
 
@@ -92,6 +92,7 @@ namespace ft{
 	};
 
 	/**
+	 * TODO remove reference and const
 	 * @name is_integral
 	 * @brief has a member value = true if @tparam T is integral
 	 */
@@ -181,4 +182,4 @@ namespace ft{
 
 }
 
-#endif //FT_CONTAINERS_TYPE_TRAITS_H
+#endif //FT_CONTAINERS_TYPE_TRAITS_HPP

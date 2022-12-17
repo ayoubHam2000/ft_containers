@@ -2,11 +2,11 @@
 /*     created by aben-ham 11/21/22         */
 /*******************************************/
 
-#ifndef FT_CONTAINERS_TREE_H
-#define FT_CONTAINERS_TREE_H
+#ifndef FT_CONTAINERS_TREE_HPP
+#define FT_CONTAINERS_TREE_HPP
 
 #include <iostream>
-#include "queue.h"
+#include "queue.hpp"
 
 //TODO remove it
 namespace std{
@@ -80,46 +80,26 @@ public:
 	/*****************************************************************/
 
 	//pre-condition parent must exist
-	nodePointer& getRef(){
+	nodePointer& getRef() const{
 		return (this->parent->leftChild == this ? this->parent->leftChild : this->parent->rightChild);
 	}
 
-	nodePointer& getRef(nodePointer& root){
+	nodePointer& getRef(nodePointer& root) const{
 		return (this->parent == nullptr ? root : getRef());
 	}
 
 	//get the closest node that will be greater than '@param node'
-	nodePointer greater(){
+	nodePointer greater() const{
 		if (this->rightChild)
 			return (findMin(this->rightChild));
 		return (findGreater(this));
 	}
 
 	//get the closest node that will be smaller than '@param node'
-	nodePointer	smaller(){
+	nodePointer	smaller() const{
 		if (this->leftChild)
 			return (findMax(this->leftChild));
 		return (findSmaller(this));
-	}
-
-private:
-
-	//get the closest ancestor node that will be greater than '@param node'
-	nodePointer findGreater(nodePointer node){
-		if (!node)
-			return (nullptr);
-		if (node->parent && node->parent->rightChild == node)
-			return (findGreater(node->parent));
-		return (node->parent);
-	}
-
-	//get the closest ancestor node that will be smaller than '@param node'
-	nodePointer findSmaller(nodePointer node){
-		if (!node)
-			return (nullptr);
-		if (node->parent && node->parent->leftChild == node)
-			return (findSmaller(node->parent));
-		return (node->parent);
 	}
 
 public:
@@ -127,13 +107,13 @@ public:
 	// RBNode Utilities BinaryNode
 	/*****************************************************************/
 
-	nodePointer getGrandParent(){
+	nodePointer getGrandParent() const{
 		if (this->parent)
 			return (this->parent->parent);
 		return (nullptr);
 	}
 
-	nodePointer getUncle(){
+	nodePointer getUncle() const{
 		if (this->parent && this->parent->parent){
 			if (this->parent->parent->leftChild == this->parent)
 				return (this->parent->parent->rightChild);
@@ -143,7 +123,7 @@ public:
 		return (nullptr);
 	}
 
-	virtual int	getColor(){
+	virtual int	getColor() const{
 		return (this->color);
 	}
 
@@ -170,6 +150,25 @@ public:
 		return (findMax(node->rightChild));
 	}
 
+private:
+
+	//get the closest ancestor node that will be greater than '@param node'
+	static nodePointer findGreater(const BinaryNode* node){
+		if (!node)
+			return (nullptr);
+		if (node->parent && node->parent->rightChild == node)
+			return (findGreater(node->parent));
+		return (node->parent);
+	}
+
+	//get the closest ancestor node that will be smaller than '@param node'
+	static nodePointer findSmaller(const nodePointer node){
+		if (!node)
+			return (nullptr);
+		if (node->parent && node->parent->leftChild == node)
+			return (findSmaller(node->parent));
+		return (node->parent);
+	}
 };
 #pragma endregion
 
@@ -181,11 +180,25 @@ public:
 	/*****************************************************************/
 
 	template <class Tp, class NodePtr, class DiffType>
-	class  tree_iterator : public iterator<std::bidirectional_iterator_tag, Tp, DiffType>
-	{
-		typedef iterator<std::bidirectional_iterator_tag, Tp, DiffType>	_base;
-		typedef BinaryNode<Tp>											node_type;
-		typedef node_type*												node_pointer;
+	class  tree_iterator : public iterator<
+	        std::bidirectional_iterator_tag,
+			typename iterator_traits<NodePtr>::value_type,
+			DiffType,
+			typename iterator_traits<NodePtr>::pointer,
+			typename iterator_traits<NodePtr>::reference
+	> {
+
+		typedef iterator<
+				std::bidirectional_iterator_tag,
+				typename iterator_traits<NodePtr>::value_type,
+				DiffType,
+				typename iterator_traits<NodePtr>::pointer,
+				typename iterator_traits<NodePtr>::reference
+		>		_base;
+
+		//typedef NodePtr															node_type;
+		//typedef node_type*														node_pointer;
+		//typedef node_type**														const_double_pointer;
 
 	public:
 		typedef typename _base::iterator_category 				iterator_category;
@@ -193,16 +206,22 @@ public:
 		typedef typename _base::difference_type 				difference_type;
 		typedef typename _base::reference 						reference;
 		typedef typename _base::pointer 						pointer;
+		typedef typename _base::value_type** 					double_pointer;
 
+		typedef Tp				data_type;
+		typedef data_type*										data_pointer;
+		typedef data_type&										data_type_reference;
 
+//	typedef const T *;
 	private:
-		node_pointer											ptr;
-		const node_pointer* 									root;
+		pointer													ptr;
+		double_pointer											root;
 
 	public:
 		tree_iterator() : ptr(nullptr), root(nullptr) {}
 
-		tree_iterator(const node_pointer node, const node_pointer* root) : ptr(node), root(root) {}
+
+		tree_iterator(pointer node,  double_pointer root) : ptr(node), root(root) {}
 
 
 		tree_iterator(const tree_iterator &other):
@@ -210,10 +229,10 @@ public:
 			root(other.root)
 		{}
 
-		template<class Up>
-		tree_iterator(const tree_iterator<Up, NodePtr, DiffType> &other):
-			ptr(other.base()),
-			root(other.getRoot())
+		template<class NodePreUp>
+		tree_iterator(const tree_iterator<Tp, NodePreUp, DiffType> &other):
+			ptr(other.ptr),
+			root(other.root)
 		{}
 
 
@@ -223,21 +242,21 @@ public:
 			return (*this);
 		}
 
-		template<class Up>
-		tree_iterator &operator=(const tree_iterator<Up, NodePtr, DiffType> &other) {
-			this->ptr = other.base();
-			this->root = other.getRoot();
+
+		template<class TpUp, class NodePreUp, class DiffTypeUp>
+		friend class tree_iterator;
+
+		template<class TpUp, class NodePreUp>
+		tree_iterator &operator=(const tree_iterator<TpUp, NodePreUp, DiffType> &other) {
+			this->ptr = other.ptr;
+			this->root = other.root;
 			return (*this);
 		}
 
 		~tree_iterator() {}
 
-		node_pointer base() const {
+		pointer base() const {
 			return (ptr);
-		}
-
-		node_pointer* getRoot() const {
-			return (root);
 		}
 
 
@@ -278,23 +297,23 @@ public:
 		// other
 		//////////////////////////
 
-		pointer operator->() const {
+		data_pointer operator->() const {
 			return (&(operator*()));
 		}
 
-		reference operator*() const {
+		data_type_reference operator*() const {
 			return (ptr->data);
 		}
 
 	}; // End tree iterator
 
-	template<class Iterator_1, class Iterator_2, class NodePtr, class DiffType>
-	bool operator==(const tree_iterator<Iterator_1, NodePtr, DiffType> &lhs, const tree_iterator<Iterator_2, NodePtr, DiffType> &rhs) {
+	template<class Tp1, class Tp2, class NodePtr1, class NodePtr2, class DiffType>
+	bool operator==(const tree_iterator<Tp1, NodePtr1, DiffType> &lhs, const tree_iterator<Tp2, NodePtr2, DiffType> &rhs) {
 		return (lhs.base() == rhs.base());
 	}
 
-	template<class Iterator_1, class Iterator_2, class NodePtr, class DiffType>
-	bool operator!=(const tree_iterator<Iterator_1, NodePtr, DiffType> &lhs, const tree_iterator<Iterator_2, NodePtr, DiffType> &rhs) {
+	template<class Tp1, class Tp2, class NodePtr1, class NodePtr2, class DiffType>
+	bool operator!=(const tree_iterator<Tp1, NodePtr1, DiffType> &lhs, const tree_iterator<Tp2, NodePtr2, DiffType> &rhs) {
 		return (lhs.base() != rhs.base());
 	}
 
@@ -329,7 +348,7 @@ class BinaryTree{
 protected:
 	typedef BinaryNode<T>												nodeType;
 	typedef nodeType *													nodePointer;
-	typedef const nodeType *											constNodePointer;
+	typedef const BinaryNode<T> *										constNodePointer;
 
 public:
 	typedef T                                      						value_type;
@@ -342,7 +361,7 @@ public:
 	typedef typename allocator_type::reference							reference;
 	typedef typename allocator_type::const_reference					const_reference;
 	typedef tree_iterator<T, nodePointer, difference_type>				iterator;
-	typedef tree_iterator<T, constNodePointer, difference_type>			const_iterator;
+	typedef tree_iterator<const T, constNodePointer, difference_type>			const_iterator;
 
 protected:
 	nodePointer															_parent;
@@ -435,40 +454,58 @@ public:
 	//iterator
 	//==========================================
 
+	iterator getIterator(nodePointer node){
+		return (iterator(node, &_parent));
+	}
+
+	const_iterator getIterator(nodePointer node) const{
+		return (const_iterator(node, const_cast<BinaryNode<T> **>(&_parent)));
+	}
+
 	iterator begin() _NOEXCEPT{
-		return iterator (findMin(), &_parent);
+		return (getIterator(findMin()));
 	}
 
 	const_iterator begin() const _NOEXCEPT{
-		return const_iterator (findMin(), &_parent);
+		return (getIterator(findMin()));
 	}
 
 	iterator end() _NOEXCEPT{
-		return iterator (findMax()->greater(), &_parent);;
+		iterator res = getIterator(findMax());
+		if (res.base() == nullptr)
+			return (res);
+		return (++res);
 	}
 
 	const_iterator end() const _NOEXCEPT{
-		return const_iterator (findMax()->greater(), &_parent);;
+		const_iterator res = getIterator(findMax());
+		if (res.base() == nullptr)
+			return (res);
+		return (++res);
 	}
 
-	iterator	find(const_reference value) const {
-		return iterator(findNode(value), &(_parent));
+	iterator	find(const_reference value) {
+		return getIterator(findNode(value));
+	}
+
+	const_iterator	find(const_reference value) const {
+		return getIterator(findNode(value));
 	}
 
 	iterator lower_bound (const_reference value){
-		return (iterator(lower_bound(_parent, value), &_parent));
+		return (getIterator(lower_bound(_parent, value)));
 	}
 
 	const_iterator lower_bound (const_reference value) const{
-		return (const_iterator(lower_bound(_parent, value), &_parent));
+		return (getIterator(lower_bound(_parent, value)));
 	}
 
 	iterator upper_bound (const_reference value){
-		return (iterator(upper_bound(_parent, value), &_parent));
+		return (getIterator(upper_bound(_parent, value)));
 	}
 
 	const_iterator upper_bound (const_reference value) const{
-		return (const_iterator(upper_bound(_parent, value), &_parent));
+		return (getIterator(upper_bound(_parent, value)));
 	}
 
 	//==========================================
@@ -534,7 +571,7 @@ public:
 	void	print_center(std::ostream &os, const std::string &item, size_type buffer_size, int color){
 		if (color == nodeType::RED)
 			os << "\033[1;31m";
-		int i = 0;
+		size_type i = 0;
 		if (item.size() > buffer_size){
 			os << item.substr(0, buffer_size - 1);
 			os << '.';
@@ -555,7 +592,7 @@ public:
 	}
 
 	void 	print_branches(std::ostream &os, size_type buffer_size){
-		int i = 0;
+		size_type i = 0;
 		size_type nb = buffer_size / 4;
 		while (i < nb){
 			os << ' ';
@@ -664,6 +701,28 @@ public:
 		}
 	}
 
+	/**
+	 * @details
+	 * the rule of the while is to find the right parent
+	 * where we can insert the value,
+	 * because the value can be larger than the grandparent (if it exist)
+	 * pre-requisite root should be != null
+	 */
+	void insert(iterator position, const_reference value){
+		nodePointer root = position.base();
+		nodePointer parent;
+
+		while (this->_comp(root->data, value)){
+			parent = root->parent;
+			if (parent && this->_comp(parent->data, value))
+				root = parent;
+			else
+				break;
+		}
+		nodePointer &ref = root->getRef(this->_parent);
+		insert(ref, value);
+	}
+
 	template <class InputIterator>
 	void remove(
 			InputIterator first,
@@ -679,9 +738,18 @@ public:
 		}
 	}
 
-	virtual void insert(const_reference value){}
+	void insert(const_reference value){
+		this->insert(this->_parent, value);
+	}
 
-	virtual void remove(const_reference value){}
+	void remove(const_reference value){
+		this->remove(this->_parent, value);
+	}
+
+protected:
+
+	virtual void insert(nodePointer &, const_reference ){};
+	virtual void remove(nodePointer &, const_reference ){};
 
 protected:
 	nodePointer	constructNode(const_reference value, const nodePointer parent = nullptr){
@@ -875,34 +943,14 @@ public:
 	}
 	virtual ~BinarySearchTree(){}
 
-public:
-
-	virtual void insert(const_reference value){
-		insertInto(this->_parent, value);
-	}
-
-	virtual void remove(const_reference value){
-		this->removeFrom(this->_parent, value);
-	}
-
 
 protected:
-	virtual void balance(nodePointer &node){}
 
-	void	insertInto(nodePointer &root, const_reference value, nodePointer parent = nullptr){
-		if (root == nullptr){
-			root = this->constructNode(value, parent);
-		}
-		else if (this->_comp(root->data, value)){
-			insertInto(root->rightChild, value, root);
-		}
-		else if (this->_comp(value, root->data)){
-			insertInto(root->leftChild, value, root);
-		}
-		balance(root);
-	}
+	virtual void insert(nodePointer &root, const_reference value){
+		insertInto(root, value, nullptr);
+	};
 
-	void removeFrom(nodePointer& root, const_reference value){
+	virtual void remove(nodePointer& root, const_reference value){
 		if (!root)
 			return ;
 		if (this->_comp(root->data, value)){
@@ -930,6 +978,24 @@ protected:
 		}
 		balance(root);
 	}
+
+	virtual void balance(nodePointer &){}
+
+private:
+
+	void	insertInto(nodePointer &root, const_reference value, nodePointer parent){
+		if (root == nullptr){
+			root = this->constructNode(value, parent);
+		}
+		else if (this->_comp(root->data, value)){
+			insertInto(root->rightChild, value, root);
+		}
+		else if (this->_comp(value, root->data)){
+			insertInto(root->leftChild, value, root);
+		}
+		balance(root);
+	}
+
 };
 
 #pragma endregion
@@ -990,7 +1056,7 @@ public:
 	}
 	~AVLTree(){}
 
-public:
+private:
 	/*****************************************************************/
 	// Utilities AVLTree
 	/*****************************************************************/
@@ -1078,39 +1144,18 @@ public:
 	~RedBlackTree(){}
 
 
-public:
+protected:
 	/*****************************************************************/
 	// Utilities of RedBlackTree
 	/*****************************************************************/
 
-	virtual void insert(const_reference value){
-		_insertInto(this->_parent, value);
-	}
+	virtual void insert(nodePointer &root, const_reference value){
+		_insertInto(root, value);
+	};
 
-	/**
-	 * @details
-	 * the rule of the while is to find the right parent
-	 * where we can insert the value,
-	 * because the value can be larger than the grandparent (if it exist)
-	 * pre-requisite root should be != null
-	 */
-	void insert(nodePointer root, const_reference value){
-		nodePointer parent;
-
-		while (this->_comp(root->data, value)){
-			parent = root->parent;
-			if (parent && this->_comp(parent->data, value))
-				root = parent;
-			else
-				break;
-		}
-		nodePointer &ref = root->getRef(this->_parent);
-		_insertInto(ref, value);
-	}
-
-	virtual void remove(const_reference value){
-		_removeFrom(this->_parent, value);
-	}
+	virtual void remove(nodePointer &root, const_reference value){
+		_removeFrom(root, value);
+	};
 
 private:
 
@@ -1324,4 +1369,4 @@ private:
 
 } //End NameSpace
 
-#endif //FT_CONTAINERS_TREE_H
+#endif //FT_CONTAINERS_TREE_HPP

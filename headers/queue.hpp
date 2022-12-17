@@ -2,8 +2,8 @@
 /*     created by aben-ham 11/23/22         */
 /*******************************************/
 
-#ifndef FT_CONTAINERS_QUEUE_H
-#define FT_CONTAINERS_QUEUE_H
+#ifndef FT_CONTAINERS_QUEUE_HPP
+#define FT_CONTAINERS_QUEUE_HPP
 
 #include "vector.hpp"
 
@@ -124,4 +124,4 @@ namespace ft{
 #pragma endregion
 }
 
-#endif //FT_CONTAINERS_QUEUE_H
+#endif //FT_CONTAINERS_QUEUE_HPP

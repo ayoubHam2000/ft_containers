@@ -7,7 +7,7 @@
 
 #include "utils.hpp"
 #include "algorithm.hpp"
-#include "Tree.h"
+#include "Tree.hpp"
 
 namespace ft{
 
@@ -204,7 +204,7 @@ public:
 	}
 
 	const mapped_type& at(const key_type& k) const{
-		iterator res = _tree.find(ft::make_pair(k, mapped_type()));
+		const_iterator res = _tree.find(ft::make_pair(k, mapped_type()));
 		if (res == end())
 			throw std::out_of_range("Element not inserted!");
 		return (res->second);
@@ -215,6 +215,13 @@ public:
 	// Modifiers (insert, erase, swap, clear)
 	/*****************************************************************/
 
+	/*
+	 * when iterators are became invalidate ?
+	 * @resource https://stackoverflow.com/questions/6438086/iterator-invalidation-rules-for-c-containers/6438087#6438087
+	 * insert shall not affect the validity of iterators and references to the container
+	 * erase: only iterators and references to the erased elements are invalidated
+	 */
+
 	pair<iterator, bool> insert (const_reference val){
 		size_type oldSize = _tree.size();
 		_tree.insert(val);
@@ -222,7 +229,7 @@ public:
 	}
 
 	iterator insert (iterator position, const_reference val){
-		_tree.insert(position.base(), val);
+		_tree.insert(position, val);
 		return (_tree.find(val));
 	}
 
@@ -309,11 +316,11 @@ public:
 	}
 
 	pair<const_iterator,const_iterator> equal_range (const key_type& k) const{
-		return (ft::make_pair(lower_bound(k, upper_bound(k))));
+		return (ft::make_pair(lower_bound(k), upper_bound(k)));
 	}
 
 	pair<iterator,iterator> equal_range (const key_type& k){
-		return (ft::make_pair(lower_bound(k, upper_bound(k))));
+		return (ft::make_pair(lower_bound(k), upper_bound(k)));
 	}
 
 
@@ -389,6 +396,6 @@ inline void swap
 	__x.swap(__y);
 }
 
-#endif //FT_CONTAINERS_MAP_H
-
 } //End NameSpace Ft
+
+#endif //FT_CONTAINERS_MAP_H
