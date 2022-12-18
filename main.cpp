@@ -2,7 +2,7 @@
 
 
 
-
+/*
 void	testIterator(){
 	typedef ft::RedBlackTree<ft::pair<const int, int>, std::less<int>, std::allocator<ft::pair<const int, int> > > RBTree;
 	typedef std::map<int, int, std::less<int>, std::allocator<std::pair<const int, int> > > map_type;
@@ -65,20 +65,21 @@ void	testIterator(){
 		cout << a.size() << " deleted: " << data << endl;
 		a.print();
 	}
-	/*a.print();
+	a.print();
 	a.erase(2);
-	a.print();*/
+	a.print();
 
-	/*cout << a.size() << endl;
+	cout << a.size() << endl;
 	a.erase(555);
-	cout << a.size() << endl;*/
+	cout << a.size() << endl;
 
-	/*my_map::iterator iter_b, iter_e;
+	my_map::iterator iter_b, iter_e;
 	iter_b = a.begin();
 	iter_e = a.end();
 	a.erase(iter_b, iter_e);
-	a.print();*/
+	a.print();
 }
+*/
 
 #define NS std
 void testErase(){
@@ -121,7 +122,7 @@ void testErase(){
 
 }
 
-
+/*
 void terminator(){
 	SETUP_ARRAYS();
 
@@ -241,17 +242,61 @@ void terminator(){
 	}
 
 }
-
+*/
 
 
 class classY{
 	const int i = 20;
 };
 
+void testBinary(){
+    typedef ft::BinarySearchTree<int, std::less<int>, std::allocator<int> > BinarySearchTree;
+
+    BinarySearchTree tree;
+
+
+
+    /*{
+        int arr[] = {3, 2, 1, 4, 5, 6, 7, 16, 15, 14, 13, 12, 11, 10, 8, 9};
+        tree.printTree();
+        int meddle = 8;
+        for (int i = 0; i < meddle; ++i){
+            tree.insert(arr[i]);
+            tree.printTree();
+            cout << "inserted: " << i << " ** " << arr[i] <<" ------------" << endl;
+        }
+        for (int i = meddle; i < 16; ++i){
+            tree.insert(arr[i]);
+            tree.printTree();
+            cout << "inserted: " << i << " ** " << arr[i] <<" ------------" << endl;
+        }
+    }*/
+
+
+   /* {
+        int arr[] = {16, 2, 9, 4, 15, 5, 8, 6, 13, 12, 3, 7, 10, 14, 11, 1};
+        int size = sizeof(arr) / sizeof(int);
+        tree.printTree();
+        int meddle = 1;
+        for (int i = 0; i < meddle; ++i){
+            tree.remove(arr[i]);
+            tree.printTree();
+            cout << "deleted: " << i << " ** " << arr[i] <<" ------------" << endl;
+        }
+        for (int i = meddle; i < size; ++i){
+            tree.remove(arr[i]);
+            tree.printTree();
+            cout << "deleted: " << i << " ** " << arr[i] <<" ------------" << endl;
+        }
+    }
+*/
+
+}
+
 int main()
 {
 
-	//testBinary();
+	testBinary();
 	//testAVL();
 	//readBlackTree();
 	//testIterator();
@@ -259,29 +304,6 @@ int main()
 
 	//terminator();
 
-	std::map<int, int> a;
-
-	for (int i = 0; i < 100; i++)
-		a[i] = i * 2;
-	std::map<int, int>::iterator iter1;
-	std::map<int, int>::iterator iter2;
-	iter1 = a.end();
-	--iter1;
-	iter2 = a.end();
-	a.erase(iter1);
-	iter2--;
-	cout << iter2->first << endl;
-
-
-
-
-	//std::map<int, int, std::less<int>, std::allocator<ft::pair<const int, int> > > b;
-
-	//decltype(i);
-
-	//static_assert(has_member_named_first<ClassB<int> >::value, "MyClass does not have myVariable");
-
-	//std::map
 
 	return (0);
 }

@@ -8,6 +8,7 @@
 #include "iterator.hpp"
 #include "utils.hpp"
 #include "algorithm.hpp"
+#include <limits>
 
 //TODO Length error max_length
 namespace ft{

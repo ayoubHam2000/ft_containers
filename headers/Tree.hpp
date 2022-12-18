@@ -92,14 +92,14 @@ public:
 
 	//get the closest node that will be greater than '@param node'
 	nodePointer greater() const{
-		if (isNotNull(this->rightChild))
+		if (this->rightChild != nullptr)
 			return (findMin(this->rightChild));
 		return (findGreater(this));
 	}
 
 	//get the closest node that will be smaller than '@param node'
 	nodePointer	smaller() const{
-		if (isNotNull(this->leftChild))
+		if (this->leftChild != nullptr)
 			return (findMax(this->leftChild));
 		return (findSmaller(this));
 	}
@@ -110,13 +110,13 @@ public:
 	/*****************************************************************/
 
 	nodePointer getGrandParent() const{
-		if (isNotNull(this->parent))
+		if (this->parent)
 			return (this->parent->parent);
 		return (nullptr);
 	}
 
 	nodePointer getUncle() const{
-		if (isNotNull(this->parent) && isNotNull(this->parent->parent)){
+		if (this->parent && this->parent->parent){
 			if (this->parent->parent->leftChild == this->parent)
 				return (this->parent->parent->rightChild);
 			else
@@ -149,8 +149,18 @@ public:
 		return (findMax(node->rightChild));
 	}
 
+    static int NodeHeight(nodePointer node){
+        if (isNull(node))
+            return (-1);
+        int leftHeight = NodeHeight(node->leftChild);
+        int rightHeight = NodeHeight(node->rightChild);
+        return (std::max(leftHeight, rightHeight) + 1);
+    }
+
 	static BinaryNode createDummy(nodePointer parent = nullptr){
-		return (BinaryNode(value_type(), nullptr, nullptr, parent, 0, DUMMY));
+        BinaryNode node = BinaryNode(value_type(), nullptr, nullptr, parent);
+        node.color = DUMMY;
+		return (node);
 	}
 
 	static bool isNull(nodePointer node){
@@ -165,18 +175,18 @@ private:
 
 	//get the closest ancestor node that will be greater than '@param node'
 	static nodePointer findGreater(const BinaryNode* node){
-		if (isNull(node))
+		if (!node)
 			return (nullptr);
-		if (isNotNull(node->parent) && node->parent->rightChild == node)
+		if (node->parent && node->parent->rightChild == node)
 			return (findGreater(node->parent));
 		return (node->parent);
 	}
 
 	//get the closest ancestor node that will be smaller than '@param node'
 	static nodePointer findSmaller(const nodePointer node){
-		if (isNull(node))
+		if (!node)
 			return (nullptr);
-		if (isNotNull(node->parent) && node->parent->leftChild == node)
+		if (node->parent && node->parent->leftChild == node)
 			return (findSmaller(node->parent));
 		return (node->parent);
 	}
@@ -331,7 +341,8 @@ struct Tree_comparator{
 	}
 	~Tree_comparator(){};
 	bool operator()(const T& x, const T& y) const{
-		return (comp(x.first, y.first));
+		return (comp(x, y));
+        //return (comp(x.first, y.first));
 	}
 private:
 	key_compare comp;
@@ -363,8 +374,8 @@ public:
 	typedef tree_iterator<const T, constNodePointer, difference_type>			const_iterator;
 
 protected:
+	nodeType 															_dummyNode;
 	nodePointer															_parent;
-	nodeType 															dummyNode;
 	value_compare														_comp;
 	node_allocator_type													_node_alloc;
 	size_type 															_size;
@@ -379,11 +390,11 @@ public:
 			const value_compare& comp = value_compare(),
 		   	const allocator_type& node_alloc = allocator_type()
 			   ) :
-			   _parent(nullptr),
-			   dummyNode(nodeType::createDummy(nullptr)),
-			   _comp(comp),
-			   _node_alloc(node_alloc),
-			   _size(0)
+            _dummyNode(nodeType::createDummy(nullptr)),
+            _parent(&_dummyNode),
+            _comp(comp),
+            _node_alloc(node_alloc),
+            _size(0)
    {
    }
 
@@ -402,6 +413,7 @@ public:
 	}
 
    BinaryTree(const BinaryTree &other) :
+           _dummyNode(nodeType::createDummy(nullptr)),
    			_parent(_clone(other._parent, nullptr)),
 		   _comp(other._comp),
 		   _node_alloc(other._node_alloc),
@@ -411,6 +423,7 @@ public:
 	BinaryTree &operator=(const BinaryTree &other){
 		BinaryTree	tmp(other);
 		_destroyTree(_parent);
+        this->_dummyNode = tmp._dummyNode;
 		this->_parent = tmp._parent;
 		this->_node_alloc = tmp._node_alloc;
 		this->_comp = tmp._comp;
@@ -437,11 +450,7 @@ public:
 	}
 
 	virtual int height(nodePointer node) const{
-		if (isNull(node))
-			return (-1);
-		int leftHeight = height(node->leftChild);
-		int rightHeight = height(node->rightChild);
-		return (std::max(leftHeight, rightHeight) + 1);
+		return (nodeType::NodeHeight(node));
 	}
 
 	int height(){
@@ -486,11 +495,15 @@ public:
 
 	iterator end() _NOEXCEPT{
 		iterator res = getIterator(findMax());
+        if (res.base() == nullptr)
+            return (nullptr);
 		return (++res);
 	}
 
 	const_iterator end() const _NOEXCEPT{
 		const_iterator res = getIterator(findMax());
+        if (res.base() == nullptr)
+            return (nullptr);
 		return (++res);
 	}
 
@@ -724,7 +737,7 @@ public:
 
 		while (this->_comp(root->data, value)){
 			parent = root->parent;
-			if (isNotNull(parent) && this->_comp(parent->data, value))
+			if (parent && this->_comp(parent->data, value))
 				root = parent;
 			else
 				break;
@@ -874,8 +887,13 @@ protected:
 
 private:
 	nodePointer _clone(nodePointer node, nodePointer parent){
-		if ()
+		if (isNull(node)){
+            if (node){
+                _dummyNode.parent = parent;
+                return &_dummyNode;
+            }
 			return (node);
+        }
 		nodePointer tmp = this->constructNode(node);
 		tmp->leftChild = _clone(node->leftChild, tmp);
 		tmp->rightChild = _clone(node->rightChild, tmp);
@@ -884,7 +902,7 @@ private:
 	}
 
 	void	_destroyTree(nodePointer &node){
-		if (node){
+		if (isNotNull(node)){
 			_destroyTree(node->leftChild);
 			_destroyTree(node->rightChild);
 			this->deleteNode(node);
@@ -961,12 +979,12 @@ protected:
 	};
 
 	virtual void remove(nodePointer& root, const_reference value){
-		if (!root)
+		if (this->isNull(root))
 			return ;
 		if (this->_comp(root->data, value)){
-			removeFrom(root->rightChild, value);
+            remove(root->rightChild, value);
 		} else if (this->_comp(value, root->data)){
-			removeFrom(root->leftChild, value);
+            remove(root->leftChild, value);
 		} else {
 			nodePointer node = root;
 			if (!node->leftChild){
@@ -994,8 +1012,13 @@ protected:
 private:
 
 	void	insertInto(nodePointer &root, const_reference value, nodePointer parent){
-		if (root == nullptr){
-			root = this->constructNode(value, parent);
+		if (this->isNull(root)){
+			nodePointer tmp = this->constructNode(value, parent);
+            if (root){
+                tmp->rightChild = &this->_dummyNode;
+                this->_dummyNode.parent = tmp;
+            }
+            root = tmp;
 		}
 		else if (this->_comp(root->data, value)){
 			insertInto(root->rightChild, value, root);
@@ -1072,11 +1095,11 @@ private:
 	/*****************************************************************/
 
 	virtual int height(nodePointer node) const{
-		return ((node == nullptr) ? -1 : node->height);
+		return ((this->isNull(node)) ? -1 : node->height);
 	}
 
 	virtual void balance(nodePointer &node){
-		if (node == nullptr)
+		if (this->isNull(node))
 			return ;
 		int balance = this->height(node->leftChild) - this->height(node->rightChild);
 		if (balance > 1){
@@ -1184,13 +1207,20 @@ private:
 		node = this->constructNode(value, parent);
 		if (!parent){
 			root = node;
+            this->_dummyNode.parent = root;
+            root->rightChild = this->_dummyNode;
 			root->color = nodeType::BLACK;
 		}
 		else{
 			if (this->_comp(node->data, parent->data))
 				parent->leftChild = node;
-			else
+			else{
+                if (parent->rightChild == &this->_dummyNode){
+                    node->rightChild = &this->_dummyNode;
+                    this->_dummyNode.parent = node;
+                }
 				parent->rightChild = node;
+            }
 			__fixUpRedBlackTreeInsert(node);
 		}
 	}
@@ -1243,7 +1273,7 @@ private:
 		int 		isLeftChild;
 		int 		oldColor;
 
-		while (node){
+		while (this->isNotNull(node)){
 			if (this->_comp(value, node->data))
 				node = node->leftChild;
 			else if (value > node->data)
@@ -1251,7 +1281,7 @@ private:
 			else
 				break ;
 		}
-		if (node){
+		if (this->isNotNull(node)){
 			oldColor = node->color;
 			isLeftChild = (node->parent && node->parent->leftChild == node);
 			if (!node->leftChild){
@@ -1304,15 +1334,15 @@ private:
 	 *  w != null because x has 2Black color.
 	 */
 	int __colorOf(nodePointer node){
-		return ((node == nullptr) ? nodeType::BLACK : node->color);
+		return ((this->isNull(node)) ? nodeType::BLACK : node->color);
 	}
 
 	void __removeFexUp(nodePointer x, nodePointer xParent, int isLeftChild){
 		nodePointer w;
 
-		if (!x && !xParent)
+		if (this->isNull(x) && !xParent)
 			return ;
-		while (!x || (x != this->_parent && x->color == nodeType::BLACK)){
+		while (this->isNull(x) || (x != this->_parent && x->color == nodeType::BLACK)){
 			if (isLeftChild){
 				w = xParent->rightChild;
 				if (__colorOf(w) == nodeType::RED){ //case 1
