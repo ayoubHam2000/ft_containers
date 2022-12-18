@@ -5,6 +5,8 @@
 #ifndef FT_CONTAINERS_TREE_HPP
 #define FT_CONTAINERS_TREE_HPP
 
+#define DUMMY 5
+
 #include <iostream>
 #include "queue.hpp"
 
@@ -150,6 +152,10 @@ public:
 		return (findMax(node->rightChild));
 	}
 
+	static BinaryNode createDummy(nodePointer parent = nullptr){
+		return (BinaryNode(value_type(), nullptr, nullptr, parent, 0, DUMMY));
+	}
+
 private:
 
 	//get the closest ancestor node that will be greater than '@param node'
@@ -206,7 +212,6 @@ private:
 		typedef typename _base::difference_type 				difference_type;
 		typedef typename _base::reference 						reference;
 		typedef typename _base::pointer 						pointer;
-		typedef typename _base::value_type** 					double_pointer;
 
 		typedef Tp				data_type;
 		typedef data_type*										data_pointer;
@@ -215,41 +220,33 @@ private:
 //	typedef const T *;
 	private:
 		pointer													ptr;
-		double_pointer											root;
 
 	public:
-		tree_iterator() : ptr(nullptr), root(nullptr) {}
+		tree_iterator() : ptr(nullptr) {}
 
 
-		tree_iterator(pointer node,  double_pointer root) : ptr(node), root(root) {}
+		tree_iterator(pointer node) : ptr(node) {}
 
 
 		tree_iterator(const tree_iterator &other):
-			ptr(other.ptr),
-			root(other.root)
+			ptr(other.ptr)
 		{}
 
 		template<class NodePreUp>
 		tree_iterator(const tree_iterator<Tp, NodePreUp, DiffType> &other):
-			ptr(other.ptr),
-			root(other.root)
+			ptr(other.ptr)
 		{}
 
 
 		tree_iterator &operator=(const tree_iterator &other) {
 			this->ptr = other.ptr;
-			this->root = other.root;
 			return (*this);
 		}
 
 
-		template<class TpUp, class NodePreUp, class DiffTypeUp>
-		friend class tree_iterator;
-
 		template<class TpUp, class NodePreUp>
 		tree_iterator &operator=(const tree_iterator<TpUp, NodePreUp, DiffType> &other) {
 			this->ptr = other.ptr;
-			this->root = other.root;
 			return (*this);
 		}
 
@@ -276,19 +273,13 @@ private:
 		}
 
 		tree_iterator &operator--() {
-			if (ptr == nullptr)
-				ptr = BinaryNode<Tp>::findMax(*root);
-			else
-				ptr = ptr->smaller();
+			ptr = ptr->smaller();
 			return (*this);
 		}
 
 		tree_iterator operator--(int) {
 			tree_iterator _tmp(*this);
-			if (ptr == nullptr)
-				ptr = BinaryNode<Tp>::findMax(*root);
-			else
-				ptr = ptr->smaller();
+			ptr = ptr->smaller();
 			return (_tmp);
 		}
 
@@ -365,6 +356,7 @@ public:
 
 protected:
 	nodePointer															_parent;
+	nodeType 															dummyNode;
 	value_compare														_comp;
 	node_allocator_type													_node_alloc;
 	size_type 															_size;
@@ -378,8 +370,14 @@ public:
 	BinaryTree(
 			const value_compare& comp = value_compare(),
 		   	const allocator_type& node_alloc = allocator_type()
-			   ) : _parent(nullptr), _comp(comp), _node_alloc(node_alloc), _size(0)
-   {}
+			   ) :
+			   _parent(nullptr),
+			   dummyNode(nodeType::createDummy(nullptr)),
+			   _comp(comp),
+			   _node_alloc(node_alloc),
+			   _size(0)
+   {
+   }
 
 	template <class InputIterator>
 	BinaryTree (

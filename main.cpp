@@ -244,7 +244,9 @@ void terminator(){
 
 
 
-
+class classY{
+	const int i = 20;
+};
 
 int main()
 {
