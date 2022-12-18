@@ -48,4 +48,18 @@ as std::allocator<T> wouldn't model that concept.
                 this->__invalidate_iterators_past(__p - 1);
                 std::__1::vector<int, std::__1::allocator<int> >::iterator __r = this->__make_iter(__p);
                 return __r;
-            }
+            
+7. 
+8. 
+9. }
+
+
+
+
+static bool isNull(nodePointer node){
+  return (node == nullptr || node->color == DUMMY);
+}
+
+static bool isNotNull(nodePointer node){
+  return (node != nullptr && node->color != DUMMY);
+}

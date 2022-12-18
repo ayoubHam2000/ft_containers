@@ -81,25 +81,25 @@ public:
 	// Utilities BinaryNode
 	/*****************************************************************/
 
-	//pre-condition parent must exist
+	//pre-condition parent must not be null
 	nodePointer& getRef() const{
 		return (this->parent->leftChild == this ? this->parent->leftChild : this->parent->rightChild);
 	}
 
 	nodePointer& getRef(nodePointer& root) const{
-		return (this->parent == nullptr ? root : getRef());
+		return (isNull(this->parent) ? root : getRef());
 	}
 
 	//get the closest node that will be greater than '@param node'
 	nodePointer greater() const{
-		if (this->rightChild)
+		if (isNotNull(this->rightChild))
 			return (findMin(this->rightChild));
 		return (findGreater(this));
 	}
 
 	//get the closest node that will be smaller than '@param node'
 	nodePointer	smaller() const{
-		if (this->leftChild)
+		if (isNotNull(this->leftChild))
 			return (findMax(this->leftChild));
 		return (findSmaller(this));
 	}
@@ -110,13 +110,13 @@ public:
 	/*****************************************************************/
 
 	nodePointer getGrandParent() const{
-		if (this->parent)
+		if (isNotNull(this->parent))
 			return (this->parent->parent);
 		return (nullptr);
 	}
 
 	nodePointer getUncle() const{
-		if (this->parent && this->parent->parent){
+		if (isNotNull(this->parent) && isNotNull(this->parent->parent)){
 			if (this->parent->parent->leftChild == this->parent)
 				return (this->parent->parent->rightChild);
 			else
@@ -125,9 +125,6 @@ public:
 		return (nullptr);
 	}
 
-	virtual int	getColor() const{
-		return (this->color);
-	}
 
 public:
 	/*****************************************************************/
@@ -136,18 +133,18 @@ public:
 
 	//min child in the tree starting from the node
 	static nodePointer findMin(const nodePointer node){
-		if (!node)
+		if (isNull(node))
 			return (nullptr);
-		if (node->leftChild == nullptr)
+		if (isNull(node->leftChild))
 			return (node);
 		return findMin(node->leftChild);
 	}
 
 	//max child in the tree starting from the node
 	static nodePointer findMax(const nodePointer node){
-		if (!node)
+		if (isNull(node))
 			return (nullptr);
-		if (node->rightChild == nullptr)
+		if (isNull(node->rightChild))
 			return (node);
 		return (findMax(node->rightChild));
 	}
@@ -156,25 +153,36 @@ public:
 		return (BinaryNode(value_type(), nullptr, nullptr, parent, 0, DUMMY));
 	}
 
+	static bool isNull(nodePointer node){
+		return (node == nullptr || node->color == DUMMY);
+	}
+
+	static bool isNotNull(nodePointer node){
+		return (node != nullptr && node->color != DUMMY);
+	}
+
 private:
 
 	//get the closest ancestor node that will be greater than '@param node'
 	static nodePointer findGreater(const BinaryNode* node){
-		if (!node)
+		if (isNull(node))
 			return (nullptr);
-		if (node->parent && node->parent->rightChild == node)
+		if (isNotNull(node->parent) && node->parent->rightChild == node)
 			return (findGreater(node->parent));
 		return (node->parent);
 	}
 
 	//get the closest ancestor node that will be smaller than '@param node'
 	static nodePointer findSmaller(const nodePointer node){
-		if (!node)
+		if (isNull(node))
 			return (nullptr);
-		if (node->parent && node->parent->leftChild == node)
+		if (isNotNull(node->parent) && node->parent->leftChild == node)
 			return (findSmaller(node->parent));
 		return (node->parent);
 	}
+
+
+
 };
 #pragma endregion
 
@@ -420,8 +428,16 @@ public:
 	// Utilities BinaryTree
 	/*****************************************************************/
 
-	virtual int height(nodeType *node) const{
-		if (!node)
+	bool isNull(nodePointer node){
+		return (nodeType::isNull(node));
+	}
+
+	bool isNotNull(nodePointer node){
+		return (nodeType::isNotNull(node));
+	}
+
+	virtual int height(nodePointer node) const{
+		if (isNull(node))
 			return (-1);
 		int leftHeight = height(node->leftChild);
 		int rightHeight = height(node->rightChild);
@@ -453,11 +469,11 @@ public:
 	//==========================================
 
 	iterator getIterator(nodePointer node){
-		return (iterator(node, &_parent));
+		return (iterator(node));
 	}
 
 	const_iterator getIterator(nodePointer node) const{
-		return (const_iterator(node, const_cast<BinaryNode<T> **>(&_parent)));
+		return (const_iterator(node));
 	}
 
 	iterator begin() _NOEXCEPT{
@@ -470,15 +486,11 @@ public:
 
 	iterator end() _NOEXCEPT{
 		iterator res = getIterator(findMax());
-		if (res.base() == nullptr)
-			return (res);
 		return (++res);
 	}
 
 	const_iterator end() const _NOEXCEPT{
 		const_iterator res = getIterator(findMax());
-		if (res.base() == nullptr)
-			return (res);
 		return (++res);
 	}
 
@@ -513,7 +525,7 @@ public:
 	nodePointer	lower_bound(nodePointer root, const_reference value) const{
 		nodePointer prev = nullptr;
 
-		while (root)
+		while (isNotNull(root))
 		{
 			if (_comp(value, root->data))
 				prev = root;
@@ -552,7 +564,7 @@ public:
 	}
 
 	nodePointer findNode(nodePointer node, const_reference value) const {
-		if (!node)
+		if (isNull(node))
 			return (nullptr);
 		else if (this->_comp(node->data, value))
 			return (findNode(node->rightChild, value));
@@ -634,7 +646,7 @@ public:
 			if (type == 1){
 				nodePointer item = queue.dequeue();
 				if (item){
-					print_center(os, std::to_string(item->data), buffer_size, item->getColor());
+					print_center(os, std::to_string(item->data), buffer_size, item->color);
 					queue.enqueue(item->leftChild);
 					queue.enqueue(item->rightChild);
 					is_empty_node.enqueue(true);
@@ -712,7 +724,7 @@ public:
 
 		while (this->_comp(root->data, value)){
 			parent = root->parent;
-			if (parent && this->_comp(parent->data, value))
+			if (isNotNull(parent) && this->_comp(parent->data, value))
 				root = parent;
 			else
 				break;
@@ -862,8 +874,8 @@ protected:
 
 private:
 	nodePointer _clone(nodePointer node, nodePointer parent){
-		if (!node)
-			return (nullptr);
+		if ()
+			return (node);
 		nodePointer tmp = this->constructNode(node);
 		tmp->leftChild = _clone(node->leftChild, tmp);
 		tmp->rightChild = _clone(node->rightChild, tmp);
