@@ -14,7 +14,8 @@
 namespace std{
 	template <class _T1, class _T2>
 	string	to_string(const ft::pair<_T1, _T2> &data){
-		return ("(" + to_string(data.first) + ", " + to_string(data.second) + ")");
+		//return ("(" + to_string(data.first) + ", " + to_string(data.second) + ")");
+		return (to_string(data.first));
 	}
 }
 
@@ -31,6 +32,8 @@ struct BinaryNode
 {
 public:
 	typedef T			value_type;
+	typedef T&			reference;
+	typedef T*			pointer;
 	typedef BinaryNode*	nodePointer;
 public:
 	value_type		data;
@@ -129,26 +132,30 @@ public:
 		return (this->color);
 	}
 
+	value_type& operator*() const {
+		return (data);
+	}
+
 public:
 	/*****************************************************************/
 	// Static Utilities BinaryNode
 	/*****************************************************************/
 
 	//min child in the tree starting from the node
-	static nodePointer findMin(const nodePointer node){
+	static nodePointer findMin(const BinaryNode* node){
 		if (!node)
 			return (nullptr);
 		if (node->leftChild == nullptr)
-			return (node);
+			return (nodePointer(node));
 		return findMin(node->leftChild);
 	}
 
 	//max child in the tree starting from the node
-	static nodePointer findMax(const nodePointer node){
+	static nodePointer findMax(const BinaryNode* node){
 		if (!node)
 			return (nullptr);
 		if (node->rightChild == nullptr)
-			return (node);
+			return (nodePointer(node));
 		return (findMax(node->rightChild));
 	}
 
@@ -161,18 +168,19 @@ private:
 			return (nullptr);
 		if (node->parent && node->parent->rightChild == node)
 			return (findGreater(node->parent));
-		return (node->parent);
+		return (nodePointer(node->parent));
 	}
 
 	//get the closest ancestor node that will be smaller than '@param node'
-	static nodePointer findSmaller(const nodePointer node){
+	static nodePointer findSmaller(const BinaryNode* node){
 		if (!node)
 			return (nullptr);
 		if (node->parent && node->parent->leftChild == node)
 			return (findSmaller(node->parent));
-		return (node->parent);
+		return (nodePointer(node->parent));
 	}
 };
+
 #pragma endregion
 
 #pragma region tree_iterator
@@ -193,10 +201,10 @@ private:
 
 		typedef iterator<
 				std::bidirectional_iterator_tag,
-				typename iterator_traits<NodePtr>::value_type,
+				typename iterator_traits<Tp*>::value_type,
 				DiffType,
-				typename iterator_traits<NodePtr>::pointer,
-				typename iterator_traits<NodePtr>::reference
+				typename iterator_traits<Tp*>::pointer,
+				typename iterator_traits<Tp*>::reference
 		>		_base;
 
 		//typedef NodePtr															node_type;
@@ -204,26 +212,24 @@ private:
 		//typedef node_type**														const_double_pointer;
 
 	public:
-		typedef typename _base::iterator_category 				iterator_category;
-		typedef typename _base::value_type 						value_type;
-		typedef typename _base::difference_type 				difference_type;
-		typedef typename _base::reference 						reference;
-		typedef typename _base::pointer 						pointer;
+		typedef typename _base::iterator_category 					iterator_category;
+		typedef typename _base::difference_type 					difference_type;
+		typedef typename _base::value_type 							value_type;
+		typedef typename _base::reference 							reference;
+		typedef typename _base::pointer 							pointer;
 
-		typedef Tp				data_type;
-		typedef data_type*										data_pointer;
-		typedef data_type&										data_type_reference;
+		typedef  NodePtr 											nodePointer;
 
 //	typedef const T *;
 	private:
-		pointer													ptr;
-		pointer													dummyMax;
+		nodePointer													ptr;
+		nodePointer													dummyMax;
 
 	public:
 		tree_iterator() : ptr(nullptr), dummyMax(nullptr) {}
 
 
-		tree_iterator(pointer node, pointer dummyMax) : ptr(node), dummyMax(dummyMax) {}
+		tree_iterator(nodePointer node, nodePointer dummyMax) : ptr(node), dummyMax(dummyMax) {}
 
 
 		tree_iterator(const tree_iterator &other):
@@ -231,8 +237,8 @@ private:
 			dummyMax(other.dummyMax)
 		{}
 
-		template<class NodePreUp>
-		tree_iterator(const tree_iterator<Tp, NodePreUp, DiffType> &other):
+		template<class TUp, class NodePreUp>
+		tree_iterator(const tree_iterator<TUp, NodePreUp, DiffType> &other):
 			ptr(other.base()),
 			dummyMax(other.getDummyMax())
 		{}
@@ -254,11 +260,11 @@ private:
 
 		~tree_iterator() {}
 
-		pointer base() const {
+		nodePointer base() const {
 			return (ptr);
 		}
 
-		pointer getDummyMax() const {
+		nodePointer getDummyMax() const {
 			return (dummyMax);
 		}
 
@@ -299,11 +305,11 @@ private:
 		// other
 		//////////////////////////
 
-		data_pointer operator->() const {
+		pointer operator->() const {
 			return (&(operator*()));
 		}
 
-		data_type_reference operator*() const {
+		reference operator*() const {
 			return (ptr->data);
 		}
 
@@ -367,8 +373,8 @@ public:
 	typedef tree_iterator<const T, constNodePointer, difference_type>			const_iterator;
 
 protected:
-	nodePointer															_parent;
 	nodeType 															_dummyMax;
+	nodePointer															_parent;
 	value_compare														_comp;
 	node_allocator_type													_node_alloc;
 	size_type 															_size;
@@ -383,8 +389,8 @@ public:
 			const value_compare& comp = value_compare(),
 		   	const allocator_type& node_alloc = allocator_type()
 			   ) :
+				_dummyMax(nodeType()),
 			   _parent(nullptr),
-			   _dummyMax(nodeType()),
 			   _comp(comp),
 			   _node_alloc(node_alloc),
 			   _size(0)
@@ -400,13 +406,14 @@ public:
 		>::type last,
 		const value_compare& comp = value_compare(),
 		const allocator_type& node_alloc = allocator_type()
-	) : _parent(nullptr), _comp(comp), _node_alloc(node_alloc), _size(0)
+	) : _dummyMax(nodeType()), _parent(nullptr), _comp(comp), _node_alloc(node_alloc), _size(0)
 	{
 		insert(first, last);
 	}
 
    BinaryTree(const BinaryTree &other) :
-   			_parent(_clone(other._parent, nullptr)),
+		   _dummyMax(nodeType()),
+		   _parent(_clone(other._parent, nullptr)),
 		   _comp(other._comp),
 		   _node_alloc(other._node_alloc),
 		   _size(other._size)
@@ -415,6 +422,7 @@ public:
 	BinaryTree &operator=(const BinaryTree &other){
 		BinaryTree	tmp(other);
 		_destroyTree(_parent);
+		this->_dummyMax.parent = tmp._dummyMax.parent;
 		this->_parent = tmp._parent;
 		this->_node_alloc = tmp._node_alloc;
 		this->_comp = tmp._comp;
@@ -484,14 +492,16 @@ public:
 		iterator res = getIterator(findMax());
 		if (res.base() == nullptr)
 			return (res);
-		return (++res);
+		++res;
+		return (res);
 	}
 
 	const_iterator end() const _NOEXCEPT{
 		const_iterator res = getIterator(findMax());
 		if (res.base() == nullptr)
 			return (res);
-		return (++res);
+		++res;
+		return (res);
 	}
 
 	iterator	find(const_reference value) {
@@ -542,7 +552,7 @@ public:
 
 	nodePointer	upper_bound(nodePointer root, const_reference value) const{
 		nodePointer lower = lower_bound(root, value);
-		if (!_comp(value, lower->data) && !_comp(lower->data, value))
+		if (lower && !_comp(value, lower->data) && !_comp(lower->data, value))
 			return (lower->greater());
 		return (lower);
 	}
@@ -725,17 +735,19 @@ public:
 	 * pre-requisite root should be != null
 	 */
 	void insert(iterator position, const_reference value){
-		nodePointer root = position.base();
+		nodePointer root = position.base() ? position.base() : _dummyMax.parent;
 		nodePointer parent;
 
-		while (this->_comp(root->data, value)){
-			parent = root->parent;
-			if (parent && this->_comp(parent->data, value))
-				root = parent;
-			else
-				break;
+		if (root){
+			while (this->_comp(root->data, value)){
+				parent = root->parent;
+				if (parent && this->_comp(parent->data, value))
+					root = parent;
+				else
+					break;
+			}
 		}
-		nodePointer &ref = root->getRef(this->_parent);
+		nodePointer &ref = root ? root->getRef(this->_parent) : this->_parent;
 		insert(ref, value);
 	}
 
@@ -1360,8 +1372,8 @@ private:
 				if (__colorOf(w) == nodeType::RED){ //case 1
 					w->color = nodeType::BLACK;
 					xParent->color = nodeType::RED;
-					this->singleRotationLeftToRight(xParent);
-					w = xParent->rightChild;
+					this->singleRotationLeftToRight(xParent->getRef(this->_parent));
+					w = xParent->leftChild;
 				}
 				if (__colorOf(w->leftChild) == nodeType::BLACK && __colorOf(w->rightChild) == nodeType::BLACK){ //case 2
 					w->color = nodeType::RED;

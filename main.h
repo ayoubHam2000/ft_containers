@@ -106,47 +106,6 @@ struct MyTimer{
 };
 
 
-void vector_test()
-{
-	int max = 10000;
-	{
-
-		std::vector<int, track_allocator<int> > v;
-
-		for (int i = 0; i < max; i++) {
-			v.push_back(i);
-		}
-		MyTimer timer;
-		while (!v.empty())
-			v.erase(v.begin());
-
-		timer.print_ms();
-
-		track_allocator<int>::print();
-		//A::print();
-	}
-
-	track_allocator<int>::reset();
-	A::reset();
-
-	{
-
-		ft::vector<int, track_allocator<int> > v;
-
-		for (int i = 0; i < max; i++) {
-			v.push_back(i);
-		}
-		MyTimer timer;
-		while (!v.empty()) {
-			v.erase(v.begin());
-		}
-
-		timer.print_ms();
-
-		track_allocator<int>::print();
-		//A::print();
-	}
-}
 
 long long A::nb_assigned = 0;
 long long A::nb_delete = 0;

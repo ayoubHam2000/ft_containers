@@ -3,7 +3,7 @@ project(ft_containers)
 
 set(CMAKE_CXX_STANDARD 98)
 
-#set(CMAKE_CXX_FLAGS "-Wall -Werror -Wextra")
+set(CMAKE_CXX_FLAGS "-Wall -Werror -Wextra")
 
 include_directories(.)
 
