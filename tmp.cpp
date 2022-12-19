@@ -68,6 +68,13 @@ void testAVL(){
 	}
 
 
+	AVLTree::iterator s = tree.begin();
+	AVLTree::iterator e = tree.end();
+	while (s != e){
+		tree.remove(*s);
+		++s;
+	}
+
 	{
 		int arr[] = {16, 2, 9, 4, 15, 5, 8, 6, 13, 12, 3, 7, 10, 14, 11, 1};
 		int size = sizeof(arr) / sizeof(int);
@@ -105,6 +112,13 @@ void readBlackTree(){
 			tree.printTree();
 			cout << "inserted: " << i << " ** " << arr[i] <<" ------------" << endl;
 		}
+	}
+
+	RBTree::iterator s = tree.begin();
+	RBTree::iterator e = tree.end();
+	while (s != e){
+		tree.remove(*s);
+		++s;
 	}
 
 	{

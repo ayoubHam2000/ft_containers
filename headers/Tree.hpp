@@ -152,9 +152,6 @@ public:
 		return (findMax(node->rightChild));
 	}
 
-	static BinaryNode createDummy(nodePointer parent = nullptr){
-		return (BinaryNode(value_type(), nullptr, nullptr, parent, 0, DUMMY));
-	}
 
 private:
 
@@ -220,33 +217,38 @@ private:
 //	typedef const T *;
 	private:
 		pointer													ptr;
+		pointer													dummyMax;
 
 	public:
-		tree_iterator() : ptr(nullptr) {}
+		tree_iterator() : ptr(nullptr), dummyMax(nullptr) {}
 
 
-		tree_iterator(pointer node) : ptr(node) {}
+		tree_iterator(pointer node, pointer dummyMax) : ptr(node), dummyMax(dummyMax) {}
 
 
 		tree_iterator(const tree_iterator &other):
-			ptr(other.ptr)
+			ptr(other.ptr),
+			dummyMax(other.dummyMax)
 		{}
 
 		template<class NodePreUp>
 		tree_iterator(const tree_iterator<Tp, NodePreUp, DiffType> &other):
-			ptr(other.ptr)
+			ptr(other.base()),
+			dummyMax(other.getDummyMax())
 		{}
 
 
 		tree_iterator &operator=(const tree_iterator &other) {
 			this->ptr = other.ptr;
+			this->dummyMax = other.dummyMax;
 			return (*this);
 		}
 
 
 		template<class TpUp, class NodePreUp>
 		tree_iterator &operator=(const tree_iterator<TpUp, NodePreUp, DiffType> &other) {
-			this->ptr = other.ptr;
+			this->ptr = other.base();
+			this->dummyMax = other.getDummyMax();
 			return (*this);
 		}
 
@@ -256,6 +258,9 @@ private:
 			return (ptr);
 		}
 
+		pointer getDummyMax() const {
+			return (dummyMax);
+		}
 
 		//////////////////////////
 		// arithmetic operations
@@ -273,13 +278,19 @@ private:
 		}
 
 		tree_iterator &operator--() {
-			ptr = ptr->smaller();
+			if (!ptr)
+				ptr = dummyMax->parent;
+			else
+				ptr = ptr->smaller();
 			return (*this);
 		}
 
 		tree_iterator operator--(int) {
 			tree_iterator _tmp(*this);
-			ptr = ptr->smaller();
+			if (!ptr)
+				ptr = dummyMax->parent;
+			else
+				ptr = ptr->smaller();
 			return (_tmp);
 		}
 
@@ -324,6 +335,7 @@ struct Tree_comparator{
 	~Tree_comparator(){};
 	bool operator()(const T& x, const T& y) const{
 		return (comp(x.first, y.first));
+		//return (comp(x, y));
 	}
 private:
 	key_compare comp;
@@ -356,7 +368,7 @@ public:
 
 protected:
 	nodePointer															_parent;
-	nodeType 															dummyNode;
+	nodeType 															_dummyMax;
 	value_compare														_comp;
 	node_allocator_type													_node_alloc;
 	size_type 															_size;
@@ -372,7 +384,7 @@ public:
 		   	const allocator_type& node_alloc = allocator_type()
 			   ) :
 			   _parent(nullptr),
-			   dummyNode(nodeType::createDummy(nullptr)),
+			   _dummyMax(nodeType()),
 			   _comp(comp),
 			   _node_alloc(node_alloc),
 			   _size(0)
@@ -453,11 +465,11 @@ public:
 	//==========================================
 
 	iterator getIterator(nodePointer node){
-		return (iterator(node, &_parent));
+		return (iterator(node, &_dummyMax));
 	}
 
 	const_iterator getIterator(nodePointer node) const{
-		return (const_iterator(node, const_cast<BinaryNode<T> **>(&_parent)));
+		return (const_iterator(node, &_dummyMax));
 	}
 
 	iterator begin() _NOEXCEPT{
@@ -672,6 +684,12 @@ public:
 		int h = height() + 1;
 		if (h >= 0)
 			printTree(this->_parent, os, h);
+		nodePointer a = findMax();
+		if (_dummyMax.parent && _dummyMax.parent != a){
+			os << a << " " << _dummyMax.parent << std::endl;
+			os << a->data << " " << _dummyMax.parent->data << std::endl;
+			exit(1);
+		}
 	}
 
 	void swap(BinaryTree &x){
@@ -754,6 +772,8 @@ protected:
 		nodePointer node = this->_node_alloc.allocate(1, nullptr);
 		this->_node_alloc.construct(node, nodeType(value, parent));
 		this->_size++;
+		if (_dummyMax.parent == nullptr || _comp(_dummyMax.parent->data, value))
+			_dummyMax.parent = node;
 		return (node);
 	}
 
@@ -761,10 +781,18 @@ protected:
 		nodePointer node = this->_node_alloc.allocate(1, nullptr);
 		this->_node_alloc.construct(node, nodeType(*other));
 		this->_size++;
+		if (_dummyMax.parent == nullptr || _comp(_dummyMax.parent->data, other->data))
+			_dummyMax.parent = node;
 		return (node);
 	}
 
 	void deleteNode(nodePointer node){
+		if (node == _dummyMax.parent){
+			if (_dummyMax.parent->leftChild)
+				_dummyMax.parent = findMax(_dummyMax.parent->leftChild);
+			else
+				_dummyMax.parent = _dummyMax.parent->parent;
+		}
 		this->_node_alloc.destroy(node);
 		this->_node_alloc.deallocate(node, 1);
 		_size--;
@@ -952,9 +980,9 @@ protected:
 		if (!root)
 			return ;
 		if (this->_comp(root->data, value)){
-			removeFrom(root->rightChild, value);
+			remove(root->rightChild, value);
 		} else if (this->_comp(value, root->data)){
-			removeFrom(root->leftChild, value);
+			remove(root->leftChild, value);
 		} else {
 			nodePointer node = root;
 			if (!node->leftChild){
