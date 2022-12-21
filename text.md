@@ -49,3 +49,15 @@ as std::allocator<T> wouldn't model that concept.
                 std::__1::vector<int, std::__1::allocator<int> >::iterator __r = this->__make_iter(__p);
                 return __r;
             }
+
+{
+//the iterator is const
+int arr[] = {1, 4, 6, 2, 3};
+   NST::set<int> a(arr, arr + 4);
+
+   NST::set<int>::iterator iter1 = a.begin();
+   NST::set<int>::const_iterator iter2 = iter1;
+
+   *iter1 = 55;
+   *iter2 = 44;
+}

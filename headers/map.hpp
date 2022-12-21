@@ -59,21 +59,25 @@ public:
 
 private:
 
-	/*struct Tree_comparator{
+	template <class T, class key_compare>
+	struct Tree_comparator{
 		Tree_comparator(const key_compare &comp = key_compare()): comp(comp)  {}
 		Tree_comparator(const Tree_comparator &other): comp(other.comp)  {}
 		Tree_comparator& operator=(const Tree_comparator &other){
 			comp = other.comp;
+			return (*this);
 		}
 		~Tree_comparator(){};
-		bool operator()(const_reference x, const_reference y){
+		bool operator()(const T& x, const T& y) const{
 			return (comp(x.first, y.first));
+			//return (comp(x, y));
 		}
 	private:
 		key_compare comp;
-	};*/
+	};
 
-	typedef ft::RedBlackTree<value_type , Compare, Allocator>		tree;
+	typedef Tree_comparator<value_type, key_compare> 					tree_compare;
+	typedef ft::RedBlackTree<value_type, tree_compare, Allocator>		tree;
 public:
 	typedef typename tree::iterator						iterator;
 	typedef typename tree::const_iterator				const_iterator;
@@ -85,7 +89,7 @@ private:
 	allocator_type	_alloc;
 public:
 	/*****************************************************************/
-	// Constructors ✅
+	// Constructors
 	/*****************************************************************/
 
 
@@ -94,7 +98,7 @@ public:
 		const key_compare& comp = key_compare(),
 		const allocator_type& alloc = allocator_type()
 		)
-			: _tree(comp, alloc), _key_com(comp), _alloc(alloc)
+			: _tree(tree_compare(comp), alloc), _key_com(comp), _alloc(alloc)
 	{}
 
 	template <class InputIterator>
@@ -106,7 +110,7 @@ public:
 		>::type last,
 		const key_compare& comp = key_compare(),
 		const allocator_type& alloc = allocator_type()
-		) : _tree(first, last, comp, alloc), _key_com(comp), _alloc(alloc)
+		) : _tree(first, last, tree_compare(comp), alloc), _key_com(comp), _alloc(alloc)
 	{}
 
 	map (const map& x)

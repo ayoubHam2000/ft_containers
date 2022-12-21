@@ -1,0 +1,75 @@
+ft::vector assign:
+23ms
+std::vector assign:
+27ms
+-------------------------------
+ft::vector assign_range:
+47ms
+std::vector assign_range:
+35ms
+-------------------------------
+ft::vector assignment:
+39ms
+std::vector assignment:
+34ms
+-------------------------------
+ft::vector ctor_copy:
+27ms
+std::vector ctor_copy:
+27ms
+-------------------------------
+ft::vector ctor_range:
+28ms
+std::vector ctor_range:
+23ms
+-------------------------------
+ft::vector ctor_size:
+10ms
+std::vector ctor_size:
+12ms
+-------------------------------
+ft::vector dtor:
+1ms
+std::vector dtor:
+0ms
+-------------------------------
+ft::vector erase:
+12796ms
+std::vector erase:
+10119ms
+-------------------------------
+ft::vector erase_range:
+0ms
+std::vector erase_range:
+0ms
+-------------------------------
+ft::vector insert:
+28747ms
+std::vector insert:
+8111ms
+-------------------------------
+ft::vector insert_range:
+55ms
+std::vector insert_range:
+43ms
+-------------------------------
+ft::vector insert_size:
+21651ms
+std::vector insert_size:
+21769ms
+-------------------------------
+ft::vector pop_back:
+13ms
+std::vector pop_back:
+12ms
+-------------------------------
+ft::vector push_back:
+47ms
+std::vector push_back:
+50ms
+-------------------------------
+ft::vector resize:
+60ms
+std::vector resize:
+75ms
+-------------------------------

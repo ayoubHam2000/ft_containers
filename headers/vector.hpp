@@ -384,6 +384,8 @@ namespace ft{
 		/**
 		 * @name capacity
 		 * @return Returns the capacity of the vector
+		 * @note https://stackoverflow.com/questions/5232198/how-does-the-capacity-of-stdvector-grow-automatically-what-is-the-rate#:~:text=The%20capacity%20of%20the%20vector,can%20tell%20how%20it's%20growing..&text=It%20is%20implementation%20dependent%2C%20but,cost%20would%20not%20be%20achieved.
+		 * The capacity of the vector is completely implementation-dependent, no one can tell how it's growing..
 		 */
 		size_type capacity() const{
 			return static_cast<size_type>(_last_max - _first);
@@ -626,10 +628,11 @@ namespace ft{
 		private:
 
 		size_type __get_new_capacity(size_type capacity){
+			size_type max_size = this->max_size();
 			size_type s = this->capacity();
 			if (!s)
 				s = 1;
-			while (s < capacity)
+			while (s < capacity && s < max_size)
 				s *= 2;
 			return (s);
 		}
@@ -646,7 +649,7 @@ namespace ft{
 			}
 			size_type capacity = this->capacity();
 			size_type size = this->size();
-			pointer new_arr = _alloc.allocate(new_capacity, _first);
+			pointer new_arr = _alloc.allocate(new_capacity);
 
 			//copy and shift
 			if (_first){
@@ -745,7 +748,15 @@ namespace ft{
 			return (static_cast<size_type>(_last_max - _last));
 		}
 
+		/**
+		 * @note
+		 * https://cplusplus.com/reference/vector/vector/insert/
+		 * Here is the relevant excerpt from the C++ standard (ISO/IEC 14882:2017(E)):
+		 * - If an exception is thrown while attempting to allocate memory, there are no effects.
+		 * @param n
+		 */
 		void _throw_out_of_range(size_type n) const{
+
 			throw std::out_of_range(
 					std::string("Vector index out of range vector _size is ") + ft::to_string(size()) +
 					std::string(" but got ") + ft::to_string(n) + std::string("."));

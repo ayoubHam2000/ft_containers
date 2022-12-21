@@ -10,6 +10,9 @@
 #include <iostream>
 #include "queue.hpp"
 
+//TODO NULL
+//TODO optimize ++iter
+
 //TODO remove it
 namespace std{
 	template <class _T1, class _T2>
@@ -142,39 +145,35 @@ public:
 	/*****************************************************************/
 
 	//min child in the tree starting from the node
-	static nodePointer findMin(const BinaryNode* node){
-		if (!node)
-			return (nullptr);
-		if (node->leftChild == nullptr)
-			return (nodePointer(node));
-		return findMin(node->leftChild);
+	static nodePointer findMin(const BinaryNode* node) {
+		if (!node) return nullptr;
+		while (node->leftChild)
+			node = node->leftChild;
+		return nodePointer(node);
 	}
 
 	//max child in the tree starting from the node
-	static nodePointer findMax(const BinaryNode* node){
+	static nodePointer findMax(const BinaryNode* node) {
 		if (!node)
-			return (nullptr);
-		if (node->rightChild == nullptr)
-			return (nodePointer(node));
-		return (findMax(node->rightChild));
+			return nullptr;
+		while (node->rightChild)
+			node = node->rightChild;
+		return (nodePointer)node;
 	}
-
 
 private:
 
 	//get the closest ancestor node that will be greater than '@param node'
+	//pre-condition node != nullptr
 	static nodePointer findGreater(const BinaryNode* node){
-		if (!node)
-			return (nullptr);
 		if (node->parent && node->parent->rightChild == node)
 			return (findGreater(node->parent));
 		return (nodePointer(node->parent));
 	}
 
 	//get the closest ancestor node that will be smaller than '@param node'
+	//pre-condition node != nullptr
 	static nodePointer findSmaller(const BinaryNode* node){
-		if (!node)
-			return (nullptr);
 		if (node->parent && node->parent->leftChild == node)
 			return (findSmaller(node->parent));
 		return (nodePointer(node->parent));
@@ -254,11 +253,12 @@ private:
 		template<class TpUp, class NodePreUp>
 		tree_iterator &operator=(const tree_iterator<TpUp, NodePreUp, DiffType> &other) {
 			this->ptr = other.base();
-			this->dummyMax = other.getDummyMax();
+			this->dummyMax =  other.getDummyMax();
 			return (*this);
 		}
 
 		~tree_iterator() {}
+
 
 		nodePointer base() const {
 			return (ptr);
@@ -329,23 +329,7 @@ private:
 
 #pragma region BinaryTree
 
-//Todo: Remove it
-template <class T, class key_compare>
-struct Tree_comparator{
-	Tree_comparator(const key_compare &comp = key_compare()): comp(comp)  {}
-	Tree_comparator(const Tree_comparator &other): comp(other.comp)  {}
-	Tree_comparator& operator=(const Tree_comparator &other){
-		comp = other.comp;
-		return (*this);
-	}
-	~Tree_comparator(){};
-	bool operator()(const T& x, const T& y) const{
-		return (comp(x.first, y.first));
-		//return (comp(x, y));
-	}
-private:
-	key_compare comp;
-};
+
 
 template <
         class T,
@@ -355,25 +339,25 @@ template <
 class BinaryTree{
 
 protected:
-	typedef BinaryNode<T>												nodeType;
-	typedef nodeType *													nodePointer;
-	typedef const BinaryNode<T> *										constNodePointer;
+	typedef BinaryNode<T>													nodeType;
+	typedef nodeType *														nodePointer;
+	typedef const BinaryNode<T> *											constNodePointer;
 
 public:
-	typedef T                                      						value_type;
-	typedef Tree_comparator<T, Compare>                      			value_compare;
-	//Compare                      										value_compare;
-	typedef Allocator                               					allocator_type;
-	typedef typename Allocator::template rebind<nodeType>::other    	node_allocator_type;
-	typedef typename allocator_type::size_type							size_type;
-	typedef typename allocator_type::difference_type					difference_type;
-	typedef typename allocator_type::reference							reference;
-	typedef typename allocator_type::const_reference					const_reference;
-	typedef tree_iterator<T, nodePointer, difference_type>				iterator;
-	typedef tree_iterator<const T, constNodePointer, difference_type>			const_iterator;
+	typedef T                                      							value_type;
+	typedef Compare                      									value_compare;
+	typedef Allocator                               						allocator_type;
+	typedef typename Allocator::template rebind<nodeType>::other    		node_allocator_type;
+	typedef typename allocator_type::size_type								size_type;
+	typedef typename allocator_type::difference_type						difference_type;
+	typedef typename allocator_type::reference								reference;
+	typedef typename allocator_type::const_reference						const_reference;
+	typedef tree_iterator<T, nodePointer, difference_type>					iterator;
+	typedef tree_iterator<const T, constNodePointer, difference_type>		const_iterator;
 
 protected:
 	nodeType 															_dummyMax;
+	nodeType 															_dummyMin;
 	nodePointer															_parent;
 	value_compare														_comp;
 	node_allocator_type													_node_alloc;
@@ -390,6 +374,7 @@ public:
 		   	const allocator_type& node_alloc = allocator_type()
 			   ) :
 				_dummyMax(nodeType()),
+				_dummyMin(nodeType()),
 			   _parent(nullptr),
 			   _comp(comp),
 			   _node_alloc(node_alloc),
@@ -406,13 +391,19 @@ public:
 		>::type last,
 		const value_compare& comp = value_compare(),
 		const allocator_type& node_alloc = allocator_type()
-	) : _dummyMax(nodeType()), _parent(nullptr), _comp(comp), _node_alloc(node_alloc), _size(0)
+	) : _dummyMax(nodeType()),
+		_dummyMin(nodeType()),
+		_parent(nullptr),
+		_comp(comp),
+		_node_alloc(node_alloc),
+		_size(0)
 	{
 		insert(first, last);
 	}
 
    BinaryTree(const BinaryTree &other) :
 		   _dummyMax(nodeType()),
+		   _dummyMin(nodeType()),
 		   _parent(_clone(other._parent, nullptr)),
 		   _comp(other._comp),
 		   _node_alloc(other._node_alloc),
@@ -423,6 +414,7 @@ public:
 		BinaryTree	tmp(other);
 		_destroyTree(_parent);
 		this->_dummyMax.parent = tmp._dummyMax.parent;
+		this->_dummyMin.parent = tmp._dummyMin.parent;
 		this->_parent = tmp._parent;
 		this->_node_alloc = tmp._node_alloc;
 		this->_comp = tmp._comp;
@@ -481,15 +473,15 @@ public:
 	}
 
 	iterator begin() _NOEXCEPT{
-		return (getIterator(findMin()));
+		return (getIterator(_dummyMin.parent));
 	}
 
 	const_iterator begin() const _NOEXCEPT{
-		return (getIterator(findMin()));
+		return (getIterator(_dummyMin.parent));
 	}
 
 	iterator end() _NOEXCEPT{
-		iterator res = getIterator(findMax());
+		iterator res = getIterator(_dummyMax.parent);
 		if (res.base() == nullptr)
 			return (res);
 		++res;
@@ -497,7 +489,7 @@ public:
 	}
 
 	const_iterator end() const _NOEXCEPT{
-		const_iterator res = getIterator(findMax());
+		const_iterator res = getIterator(_dummyMax.parent);
 		if (res.base() == nullptr)
 			return (res);
 		++res;
@@ -703,6 +695,8 @@ public:
 	}
 
 	void swap(BinaryTree &x){
+		ft::swap(x._dummyMax.parent, _dummyMax.parent);
+		ft::swap(x._dummyMin.parent, _dummyMin.parent);
 		ft::swap(x._parent, _parent);
 		ft::swap(x._size, _size);
 	}
@@ -734,8 +728,8 @@ public:
 	 * because the value can be larger than the grandparent (if it exist)
 	 * pre-requisite root should be != null
 	 */
-	void insert(iterator position, const_reference value){
-		nodePointer root = position.base() ? position.base() : _dummyMax.parent;
+	void insert(const_iterator position, const_reference value){
+		nodePointer root = const_cast<nodePointer>(position.base() ? position.base() : _dummyMax.parent);
 		nodePointer parent;
 
 		if (root){
@@ -781,20 +775,24 @@ protected:
 
 protected:
 	nodePointer	constructNode(const_reference value, const nodePointer parent = nullptr){
-		nodePointer node = this->_node_alloc.allocate(1, nullptr);
+		nodePointer node = this->_node_alloc.allocate(1);
 		this->_node_alloc.construct(node, nodeType(value, parent));
 		this->_size++;
 		if (_dummyMax.parent == nullptr || _comp(_dummyMax.parent->data, value))
 			_dummyMax.parent = node;
+		if (_dummyMin.parent == nullptr || _comp(value, _dummyMin.parent->data))
+			_dummyMin.parent = node;
 		return (node);
 	}
 
 	nodePointer constructNode(const nodePointer other){
-		nodePointer node = this->_node_alloc.allocate(1, nullptr);
+		nodePointer node = this->_node_alloc.allocate(1);
 		this->_node_alloc.construct(node, nodeType(*other));
 		this->_size++;
 		if (_dummyMax.parent == nullptr || _comp(_dummyMax.parent->data, other->data))
 			_dummyMax.parent = node;
+		if (_dummyMin.parent == nullptr || _comp(other->data, _dummyMin.parent->data))
+			_dummyMin.parent = node;
 		return (node);
 	}
 
@@ -804,6 +802,12 @@ protected:
 				_dummyMax.parent = findMax(_dummyMax.parent->leftChild);
 			else
 				_dummyMax.parent = _dummyMax.parent->parent;
+		}
+		if (node == _dummyMin.parent){
+			if (_dummyMin.parent->rightChild)
+				_dummyMin.parent = findMin(_dummyMin.parent->rightChild);
+			else
+				_dummyMin.parent = _dummyMin.parent->parent;
 		}
 		this->_node_alloc.destroy(node);
 		this->_node_alloc.deallocate(node, 1);

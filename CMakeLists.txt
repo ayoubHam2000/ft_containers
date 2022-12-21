@@ -15,4 +15,4 @@ add_executable(ft_containers
         src/containers/vector.cpp
         src/iterators/iterator.cpp
         headers/iterator.hpp
-        main.cpp headers/utils.hpp test.cpp headers/algorithm.hpp headers/track_alloc.hpp headers/stack.hpp headers/map.hpp headers/Tree.hpp main.h headers/queue.hpp headers/type_traits.hpp headers/map_prelude.h)
+        main.cpp headers/utils.hpp test.cpp headers/algorithm.hpp headers/track_alloc.hpp headers/stack.hpp headers/map.hpp headers/Tree.hpp main.h headers/queue.hpp headers/type_traits.hpp headers/map_prelude.h headers/set.hpp)
