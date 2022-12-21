@@ -97,7 +97,6 @@ namespace ft{
 						>()
 				);
 	};
-
 }
 
 #endif //FT_CONTAINERS_ALGORITHM_HPP
