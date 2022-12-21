@@ -96,6 +96,7 @@ std::vector<int> comparator_test(std::map<T, V> mp) {
 	v.push_back(mp1.size());
 	return v;
 }
+*/
 
 template <class T, class V>
 std::vector<int> comparator_test(_map<T, V> mp) {

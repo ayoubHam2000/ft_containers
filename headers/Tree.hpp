@@ -87,25 +87,25 @@ public:
 	// Utilities BinaryNode
 	/*****************************************************************/
 
-	//pre-condition parent must exist
+	//pre-condition parent must not be null
 	nodePointer& getRef() const{
 		return (this->parent->leftChild == this ? this->parent->leftChild : this->parent->rightChild);
 	}
 
 	nodePointer& getRef(nodePointer& root) const{
-		return (this->parent == nullptr ? root : getRef());
+		return (isNull(this->parent) ? root : getRef());
 	}
 
 	//get the closest node that will be greater than '@param node'
 	nodePointer greater() const{
-		if (this->rightChild)
+		if (this->rightChild != nullptr)
 			return (findMin(this->rightChild));
 		return (findGreater(this));
 	}
 
 	//get the closest node that will be smaller than '@param node'
 	nodePointer	smaller() const{
-		if (this->leftChild)
+		if (this->leftChild != nullptr)
 			return (findMax(this->leftChild));
 		return (findSmaller(this));
 	}
@@ -131,9 +131,6 @@ public:
 		return (nullptr);
 	}
 
-	virtual int	getColor() const{
-		return (this->color);
-	}
 
 	value_type& operator*() const {
 		return (data);
@@ -145,6 +142,7 @@ public:
 	/*****************************************************************/
 
 	//min child in the tree starting from the node
+
 	static nodePointer findMin(const BinaryNode* node) {
 		if (!node) return nullptr;
 		while (node->leftChild)
@@ -178,6 +176,9 @@ private:
 			return (findSmaller(node->parent));
 		return (nodePointer(node->parent));
 	}
+
+
+
 };
 
 #pragma endregion
@@ -329,8 +330,6 @@ private:
 
 #pragma region BinaryTree
 
-
-
 template <
         class T,
 		class Compare,
@@ -432,12 +431,16 @@ public:
 	// Utilities BinaryTree
 	/*****************************************************************/
 
-	virtual int height(nodeType *node) const{
-		if (!node)
-			return (-1);
-		int leftHeight = height(node->leftChild);
-		int rightHeight = height(node->rightChild);
-		return (std::max(leftHeight, rightHeight) + 1);
+	bool isNull(nodePointer node){
+		return (nodeType::isNull(node));
+	}
+
+	bool isNotNull(nodePointer node){
+		return (nodeType::isNotNull(node));
+	}
+
+	virtual int height(nodePointer node) const{
+		return (nodeType::NodeHeight(node));
 	}
 
 	int height(){
@@ -527,7 +530,7 @@ public:
 	nodePointer	lower_bound(nodePointer root, const_reference value) const{
 		nodePointer prev = nullptr;
 
-		while (root)
+		while (isNotNull(root))
 		{
 			if (_comp(value, root->data))
 				prev = root;
@@ -566,7 +569,7 @@ public:
 	}
 
 	nodePointer findNode(nodePointer node, const_reference value) const {
-		if (!node)
+		if (isNull(node))
 			return (nullptr);
 		else if (this->_comp(node->data, value))
 			return (findNode(node->rightChild, value));
@@ -648,7 +651,7 @@ public:
 			if (type == 1){
 				nodePointer item = queue.dequeue();
 				if (item){
-					print_center(os, std::to_string(item->data), buffer_size, item->getColor());
+					print_center(os, std::to_string(item->data), buffer_size, item->color);
 					queue.enqueue(item->leftChild);
 					queue.enqueue(item->rightChild);
 					is_empty_node.enqueue(true);
@@ -906,8 +909,13 @@ protected:
 
 private:
 	nodePointer _clone(nodePointer node, nodePointer parent){
-		if (!node)
-			return (nullptr);
+		if (isNull(node)){
+            if (node){
+                _dummyNode.parent = parent;
+                return &_dummyNode;
+            }
+			return (node);
+        }
 		nodePointer tmp = this->constructNode(node);
 		tmp->leftChild = _clone(node->leftChild, tmp);
 		tmp->rightChild = _clone(node->rightChild, tmp);
@@ -916,7 +924,7 @@ private:
 	}
 
 	void	_destroyTree(nodePointer &node){
-		if (node){
+		if (isNotNull(node)){
 			_destroyTree(node->leftChild);
 			_destroyTree(node->rightChild);
 			this->deleteNode(node);
@@ -993,7 +1001,7 @@ protected:
 	};
 
 	virtual void remove(nodePointer& root, const_reference value){
-		if (!root)
+		if (this->isNull(root))
 			return ;
 		if (this->_comp(root->data, value)){
 			remove(root->rightChild, value);
@@ -1026,8 +1034,13 @@ protected:
 private:
 
 	void	insertInto(nodePointer &root, const_reference value, nodePointer parent){
-		if (root == nullptr){
-			root = this->constructNode(value, parent);
+		if (this->isNull(root)){
+			nodePointer tmp = this->constructNode(value, parent);
+            if (root){
+                tmp->rightChild = &this->_dummyNode;
+                this->_dummyNode.parent = tmp;
+            }
+            root = tmp;
 		}
 		else if (this->_comp(root->data, value)){
 			insertInto(root->rightChild, value, root);
@@ -1104,11 +1117,11 @@ private:
 	/*****************************************************************/
 
 	virtual int height(nodePointer node) const{
-		return ((node == nullptr) ? -1 : node->height);
+		return ((this->isNull(node)) ? -1 : node->height);
 	}
 
 	virtual void balance(nodePointer &node){
-		if (node == nullptr)
+		if (this->isNull(node))
 			return ;
 		int balance = this->height(node->leftChild) - this->height(node->rightChild);
 		if (balance > 1){
@@ -1216,13 +1229,20 @@ private:
 		node = this->constructNode(value, parent);
 		if (!parent){
 			root = node;
+            this->_dummyNode.parent = root;
+            root->rightChild = this->_dummyNode;
 			root->color = nodeType::BLACK;
 		}
 		else{
 			if (this->_comp(node->data, parent->data))
 				parent->leftChild = node;
-			else
+			else{
+                if (parent->rightChild == &this->_dummyNode){
+                    node->rightChild = &this->_dummyNode;
+                    this->_dummyNode.parent = node;
+                }
 				parent->rightChild = node;
+            }
 			__fixUpRedBlackTreeInsert(node);
 		}
 	}
@@ -1275,7 +1295,7 @@ private:
 		int 		isLeftChild;
 		int 		oldColor;
 
-		while (node){
+		while (this->isNotNull(node)){
 			if (this->_comp(value, node->data))
 				node = node->leftChild;
 			else if (value > node->data)
@@ -1283,7 +1303,7 @@ private:
 			else
 				break ;
 		}
-		if (node){
+		if (this->isNotNull(node)){
 			oldColor = node->color;
 			isLeftChild = (node->parent && node->parent->leftChild == node);
 			if (!node->leftChild){
@@ -1336,15 +1356,15 @@ private:
 	 *  w != null because x has 2Black color.
 	 */
 	int __colorOf(nodePointer node){
-		return ((node == nullptr) ? nodeType::BLACK : node->color);
+		return ((this->isNull(node)) ? nodeType::BLACK : node->color);
 	}
 
 	void __removeFexUp(nodePointer x, nodePointer xParent, int isLeftChild){
 		nodePointer w;
 
-		if (!x && !xParent)
+		if (this->isNull(x) && !xParent)
 			return ;
-		while (!x || (x != this->_parent && x->color == nodeType::BLACK)){
+		while (this->isNull(x) || (x != this->_parent && x->color == nodeType::BLACK)){
 			if (isLeftChild){
 				w = xParent->rightChild;
 				if (__colorOf(w) == nodeType::RED){ //case 1

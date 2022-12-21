@@ -7,6 +7,9 @@
 
 #include <iostream>
 
+#define nullptr NULL
+#define _NOEXCEPT noexcept
+
 namespace ft{
 
 #pragma region iterator_traits
