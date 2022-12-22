@@ -35,7 +35,8 @@ public:
 
 		class value_compare
 		{
-		private:
+			friend class map;
+		protected:
 			key_compare comp;
 		public:
 			value_compare(): comp(key_compare())  {}

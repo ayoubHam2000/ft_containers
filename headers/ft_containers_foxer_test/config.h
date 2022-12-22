@@ -1,14 +1,19 @@
-#pragma once
+/*******************************************/
+/*     created by aben-ham 12/21/22         */
+/*******************************************/
+
+#ifndef FT_CONTAINERS_CONFIG_H
+#define FT_CONTAINERS_CONFIG_H
 
 /**************************************************/
 /*			Change paths to your files			  */
+/*				or comment #include				  */
+/*		if you haven't yet some container		  */
 /**************************************************/
-#define VECTOR			"../../../vector.hpp"
-#define STACK			"../../../stack.hpp"
-#define MAP			  	"../../../map.hpp"
-#define SET			  	"../../../set.hpp"
-#define UTILITIES		"../../../utils.hpp"
-
+#include "../vector.hpp"
+#include "../map.hpp"
+#include "../set.hpp"
+#include "../stack.hpp"
 
 /**************************************************/
 /*		Change template names of your classes	  */
@@ -23,3 +28,5 @@
 #define	_make_pair 			ft::make_pair
 #define	_lexicographical	ft::lexicographical_compare
 #define	_equal				ft::equal
+
+#endif //FT_CONTAINERS_CONFIG_H
