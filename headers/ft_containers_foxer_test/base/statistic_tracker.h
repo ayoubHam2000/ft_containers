@@ -14,7 +14,6 @@ struct statistic_tracker{
     size_t 	nb_bad_construct;//Called construct on null Or Called construct on initialized memory
     size_t 	nb_destruct;
     size_t 	nb_bad_destruct;//Called destroy on null Or Called destroy on uninitialized memory
-    size_t 	nb_bad_size;
     size_t 	nb_bad_deallocate;//deallocate on unconstructed memory region or deallocate a null pointer
 
 

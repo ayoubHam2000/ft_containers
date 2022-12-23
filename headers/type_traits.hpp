@@ -6,13 +6,15 @@
 #define FT_CONTAINERS_TYPE_TRAITS_HPP
 
 #include <iostream>
-#define _NOEXCEPT throw()
 
-#if 1
+
+#if defined(__linux__)
 #include <type_traits>
 #include <cstddef>
 #include <string>
 #include <limits>
+#include <iomanip>
+#define _NOEXCEPT throw()
 #endif
 
 namespace ft{

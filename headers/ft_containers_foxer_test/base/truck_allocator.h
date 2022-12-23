@@ -123,7 +123,7 @@ public:
 	void destroy(pointer p)
 	{
 		if (p == NULL) {
-			//Called destroy on null"
+			//Called destroy on null
 			memory_tracker::s.nb_bad_destruct++;
 		}
 
