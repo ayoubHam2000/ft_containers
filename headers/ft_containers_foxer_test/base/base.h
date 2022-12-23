@@ -8,7 +8,7 @@
 #include "../config.h"
 #include <set>
 #include <map>
-#include <set>
+#include <vector>
 #include <stack>
 #include <iostream>
 #include <sys/time.h>
@@ -18,6 +18,15 @@
 #include <iomanip>
 #include <unistd.h>
 #include <random>
+#include <type_traits>
+#include <cstddef>
+#include <string>
+#include <limits>
+#include "memory_tracker.h"
+#include "truck_allocator.h"
+#include "utils.h"
+
+time_t get_time(void);
 
 #define BLUE "\e[0;34m"
 #define RED "\e[0;31m"

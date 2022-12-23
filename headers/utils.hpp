@@ -151,13 +151,7 @@ namespace ft{
 
 	//TODO __is_swappable
 	template <class _T1, class _T2>
-	typename enable_if
-			<
-					std::__is_swappable<_T1>::value &&
-					std::__is_swappable<_T2>::value,
-					void
-			>::type
-	swap(pair<_T1, _T2> &x, pair<_T1, _T2> &y) _NOEXCEPT
+	void swap(pair<_T1, _T2> &x, pair<_T1, _T2> &y) _NOEXCEPT
 	{
 		x.swap(y);
 	}

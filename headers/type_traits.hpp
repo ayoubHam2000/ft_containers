@@ -6,6 +6,14 @@
 #define FT_CONTAINERS_TYPE_TRAITS_HPP
 
 #include <iostream>
+#define _NOEXCEPT throw()
+
+#if 1
+#include <type_traits>
+#include <cstddef>
+#include <string>
+#include <limits>
+#endif
 
 namespace ft{
 
@@ -102,8 +110,6 @@ namespace ft{
 	template <> struct is_integral<signed char > : public true_type {};
 	template <> struct is_integral<unsigned char> : public true_type {};
 	template <> struct is_integral<wchar_t> : public true_type {};
-	template <> struct is_integral<char16_t> : public true_type {};
-	template <> struct is_integral<char32_t> : public true_type {};
 	template <> struct is_integral<short> : public true_type {};
 	template <> struct is_integral<unsigned short> : public true_type {};
 	template <> struct is_integral<int> : public true_type {};
