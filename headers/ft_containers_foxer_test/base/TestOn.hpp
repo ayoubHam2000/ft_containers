@@ -14,15 +14,16 @@ template <class containerType>
 class TestOn{
 public:
 	typedef containerType container;
+	typedef typename containerType::value_type value_type;
 	typedef void (TestOn::* functionPointer)();
 	//typedef std::vector<int> container;
 public:
-	std::set<typename containerType::value_type> 	c;
-	time_t											time;
-	bool											leaks;
-	statistic_tracker								s_tracker;
-	std::string 									name;
-	functionPointer 								testFunction;
+	std::list<value_type> 		c;
+	time_t						time;
+	bool						leaks;
+	statistic_tracker			s_tracker;
+	std::string 				name;
+	functionPointer 			testFunction;
 public:
 	TestOn() : c(), time(0), leaks(false) {}
 	TestOn(const TestOn& other): c(other.c), time(other.time), leaks(other.leaks) {}
@@ -51,16 +52,19 @@ public:
 		leaks = false;
 	}
 
-	void test(){
+	void construct(){
 		container a;
+		container b(50, value_type());
+		try{
+			//should throw
+			container d(-1, value_type());
+		}catch (...){}
+		std::vector<value_type> arr(50, value_type());
+		container e(arr.begin(), arr.end());
 
-		{
-			for (int i = 0; i != 10000; i++){
-				a.push_back(i);
-			}
-		}
-
-		c.insert(a.begin(), a.end());
+		c.insert(c.begin(), a.begin(), a.end());
+		c.insert(c.begin(), b.begin(), b.end());
+		c.insert(c.begin(), e.begin(), e.end());
 	}
 
 public:
@@ -77,6 +81,8 @@ public:
 	static bool compareContainers(container1& c1, container2& c2)
 	{
 		if (c1.size() != c2.size())
+			return (false);
+		if (c1.max_size() != c2.max_size())
 			return (false);
 		typename container1::iterator first1 = c1.begin();
 		typename container2::iterator first2 = c2.begin();
@@ -99,7 +105,7 @@ public:
 		std::cout << BLUE << "nb_bad_construct :: " << YELLOW << "Called construct on null || Called construct on initialized memory" << std::endl;
 		std::cout << BLUE << "nb_bad_destruct :: " << YELLOW << "Called destroy on null || Called destroy on uninitialized memory" << std::endl;
 		std::cout << BLUE << "nb_bad_deallocate :: " << YELLOW << "Called deallocate on non-allocated address || Called deallocate with wrong block size" << std::endl;
-		std::cout << BLUE << "SAME Filed :: " << YELLOW << "Ok if the content of the containers are equals !! (other errors has no effect)" << std::endl;
+		std::cout << BLUE << "SAME Filed :: " << YELLOW << "Ok if the content of the containers are equals and have the same max_size !! (other errors has no effect)" << std::endl;
 		std::cout << RESET;
 	}
 
@@ -158,7 +164,9 @@ public:
 
 		bool isSame = compareContainers(std_test.c, ft_test.c);
 		bool leaks = memory_tracker::allocation_empty();
-		bool errors = !isSame || !leaks || ft_test.s_tracker.nb_bad_construct || ft_test.s_tracker.nb_bad_deallocate || ft_test.s_tracker.nb_bad_destruct || ft_test.s_tracker.nb_allocation != ft_test.s_tracker.nb_deallocate;
+		bool errors = !isSame || !leaks || ft_test.s_tracker.nb_bad_construct || ft_test.s_tracker.nb_bad_deallocate
+				|| ft_test.s_tracker.nb_bad_destruct || ft_test.s_tracker.nb_allocation != ft_test.s_tracker.nb_deallocate
+				|| ft_test.s_tracker.nb_construct != ft_test.s_tracker.nb_destruct;
 		printElement(!errors);
 		printElement(isSame);
 		printElement(leaks);
@@ -171,8 +179,8 @@ public:
 		std::cout
 			<< "[a " << BLUE << std_test.s_tracker.nb_allocation << WHITE << "-" << (ft_test.s_tracker.nb_allocation != ft_test.s_tracker.nb_deallocate ? RED : GREEN) << ft_test.s_tracker.nb_allocation << WHITE
 			<< ", de " << BLUE << std_test.s_tracker.nb_deallocate << WHITE << "-" << (ft_test.s_tracker.nb_deallocate != ft_test.s_tracker.nb_allocation ? RED : GREEN) << ft_test.s_tracker.nb_deallocate << WHITE
-			<< ", c " << BLUE << std_test.s_tracker.nb_construct << WHITE << "-" << ft_test.s_tracker.nb_construct
-			<< ", ds " << BLUE << std_test.s_tracker.nb_destruct << WHITE << "-" << ft_test.s_tracker.nb_destruct
+			<< ", c " << BLUE << std_test.s_tracker.nb_construct << WHITE << "-" << (ft_test.s_tracker.nb_construct != ft_test.s_tracker.nb_destruct ? RED : GREEN) << ft_test.s_tracker.nb_construct << WHITE
+			<< ", ds " << BLUE << std_test.s_tracker.nb_destruct << WHITE << "-" << (ft_test.s_tracker.nb_construct != ft_test.s_tracker.nb_destruct ? RED : GREEN) << ft_test.s_tracker.nb_destruct << WHITE
 			<< ", b_c " << BLUE << std_test.s_tracker.nb_bad_construct << WHITE << "-" << (ft_test.s_tracker.nb_bad_construct ? RED : GREEN) << ft_test.s_tracker.nb_bad_construct << WHITE
 			<< ", b_ds " << BLUE << std_test.s_tracker.nb_bad_destruct << WHITE << "-" << (ft_test.s_tracker.nb_bad_destruct ? RED : GREEN) << ft_test.s_tracker.nb_bad_destruct << WHITE
 			<< ", b_de " << BLUE << std_test.s_tracker.nb_bad_deallocate << WHITE << "-" << (ft_test.s_tracker.nb_bad_deallocate ? RED : GREEN) << ft_test.s_tracker.nb_bad_deallocate << WHITE

@@ -7,6 +7,7 @@
 
 #include "../config.h"
 #include <set>
+#include <list>
 #include <map>
 #include <vector>
 #include <stack>
