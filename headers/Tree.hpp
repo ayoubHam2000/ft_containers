@@ -729,7 +729,7 @@ public:
 	 * pre-requisite root should be != null
 	 */
 	void insert(const_iterator position, const_reference value){
-		nodePointer root = const_cast<nodePointer>(position.base() ? position.base() : _dummyMax.parent);
+		/*nodePointer root = const_cast<nodePointer>(position.base() ? position.base() : _dummyMax.parent);
 		nodePointer parent;
 
 		if (root){
@@ -741,8 +741,8 @@ public:
 					break;
 			}
 		}
-		nodePointer &ref = root ? root->getRef(this->_parent) : this->_parent;
-		insert(ref, value);
+		nodePointer &ref = root ? root->getRef(this->_parent) : this->_parent;*/
+		insert(_parent, value);
 	}
 
 	template <class InputIterator>

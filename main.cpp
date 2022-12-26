@@ -184,11 +184,11 @@ void stackTests(){
 
 void setTests(){
 	TestOnType::printSetHeader();
-	evaluateResult(SET_COUNTER, "set_general_test1");
-	evaluateResult(SET_COUNTER + 1, "set_general_test2");
-	evaluateResult(SET_COUNTER + 2, "set_general_test3");
+	//evaluateResult(SET_COUNTER, "set_general_test1");
+	//evaluateResult(SET_COUNTER + 1, "set_general_test2");
+	//evaluateResult(SET_COUNTER + 2, "set_general_test3");
 	evaluateResult(SET_COUNTER + 3, "set_general_test4");
-	evaluateResult(SET_COUNTER + 4, "set_time_general");
+	//evaluateResult(SET_COUNTER + 4, "set_time_general");
 }
 
 void mapTests(){

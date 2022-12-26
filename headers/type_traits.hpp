@@ -14,6 +14,7 @@
 #include <string>
 #include <limits>
 #include <iomanip>
+#include <iterator>
 #define _NOEXCEPT throw()
 #endif
 

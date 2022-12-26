@@ -46,8 +46,6 @@ public:
 	typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 private:
 	tree 			_tree;
-	key_compare 	_key_com;
-	allocator_type	_alloc;
 
 public:
 	/*****************************************************************/
@@ -59,7 +57,7 @@ public:
 			const key_compare& comp = key_compare(),
 			const allocator_type& alloc = allocator_type()
 	)
-			: _tree(comp, alloc), _key_com(comp), _alloc(alloc)
+			: _tree(comp, alloc)
 	{}
 
 	template <class InputIterator>
@@ -71,11 +69,11 @@ public:
 	>::type last,
 	const key_compare& comp = key_compare(),
 	const allocator_type& alloc = allocator_type()
-	) : _tree(first, last, comp, alloc), _key_com(comp), _alloc(alloc)
+	) : _tree(first, last, comp, alloc)
 	{}
 
 	set (const set& x)
-			: _tree(x._tree), _key_com(x._key_com), _alloc(x._alloc)
+			: _tree(x._tree)
 	{}
 
 	set& operator=(const set& x){

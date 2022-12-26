@@ -102,24 +102,24 @@ public:
 		}
 	};
 
-	template <class T, class key_compare>
-	struct CustomComparator{
+	template<typename Tp>
+	struct CustomComparator : public std::binary_function<Tp, Tp, bool>
+	{
 		mutable int state;
-		CustomComparator(const key_compare &comp = key_compare()): comp(comp)  {}
-		CustomComparator(const CustomComparator &other): comp(other.comp)  {}
+		CustomComparator(): state(0){}
+		CustomComparator(const CustomComparator &other): state(other.state)  {}
 		CustomComparator& operator=(const CustomComparator &other){
-			comp = other.comp;
-			return (*this);
+			state = other.state;
 		}
 		~CustomComparator(){};
-		bool operator()(const T& x, const T& y) const{
+
+		bool operator()(const value_type& x, const value_type& y) const
+		{
 			state++;
-			return (comp(x, y));
-			//return (comp(x, y));
+			return x < y;
 		}
-	private:
-		key_compare comp;
 	};
+
 
 #pragma endregion
 
@@ -129,6 +129,7 @@ public:
 /*****************************************************************/
 #pragma region VectorTest
 public:
+//TODO test max_size
 	void int_vector_general_test1(){
 		//test all type of constructor
 		//all iterators
@@ -936,7 +937,7 @@ public:
 
 		bool is_std = std::is_same<type , std::set<typename type::value_type, typename  type::key_compare, typename type::allocator_type> >::value;
 		if (is_std){
-			typedef CustomComparator<int, std::less<int> > the_cmp;
+			typedef CustomComparator<int> the_cmp;
 			typedef std::set<int, the_cmp > new_type;
 
 			the_cmp compare;
@@ -944,17 +945,24 @@ public:
 			new_type a_set(compare);
 			for (int i = 0; i < 55; i++)
 				a_set.insert(i);
-			c.push_back(compare.state);
+			new_type b_set(compare);
+			int res = b_set.key_comp().state;
+			res = a_set.key_comp().state;
+			c.push_back(res);
 		}else{
-			typedef CustomComparator<int, std::less<int> > the_cmp;
+			typedef CustomComparator<int> the_cmp;
 			typedef ft::set<int, the_cmp > new_type;
 
 			the_cmp compare;
 			compare.state++;
 			new_type a_set(compare);
-			for (int i = 0; i < 55; i++)
-				a_set.insert(i);
-			c.push_back(compare.state);
+			//for (int i = 0; i < 55; i++)
+			a_set.insert(80);
+			a_set.insert(99);
+			new_type b_set(compare);
+			int res = b_set.key_comp().state;
+			res = a_set.key_comp().state;
+			c.push_back(res);
 		}
 
 	}
@@ -1173,8 +1181,6 @@ public:
 	static bool compareContainers(container1& c1, container2& c2)
 	{
 		if (c1.size() != c2.size())
-			return (false);
-		if (c1.max_size() != c2.max_size())
 			return (false);
 		typename container1::iterator first1 = c1.begin();
 		typename container2::iterator first2 = c2.begin();
