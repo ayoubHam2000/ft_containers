@@ -78,8 +78,6 @@ public:
 
 	set& operator=(const set& x){
 		this->_tree = x._tree;
-		this->_alloc = x._alloc;
-		this->_key_com = x._key_com;
 		return (*this);
 	}
 
@@ -165,7 +163,7 @@ public:
 		return (ft::make_pair(_tree.find(val), oldSize != _tree.size()));
 	}
 
-	iterator insert (iterator position, const_reference val){
+	iterator insert (const_iterator position, const_reference val){
 		_tree.insert(position, val);
 		return (_tree.find(val));
 	}
@@ -176,7 +174,7 @@ public:
 	}
 
 
-	void erase (iterator position){
+	void erase (const_iterator position){
 		_tree.remove(*position);
 	}
 
@@ -186,7 +184,7 @@ public:
 		return (oldSize != _tree.size());
 	}
 
-	void erase (iterator first, iterator last){
+	void erase (const_iterator first, const_iterator last){
 		_tree.remove(first, last);
 	}
 
@@ -203,7 +201,7 @@ public:
 	/*****************************************************************/
 
 	key_compare key_comp() const{
-		return (key_compare(_key_com));
+		return (key_compare(_tree.key_comp()));
 	}
 
 	value_compare value_comp() const{
@@ -211,7 +209,7 @@ public:
 	}
 
 	allocator_type get_allocator() const{
-		return (allocator_type(_alloc));
+		return (allocator_type(_tree.get_allocator()));
 	}
 
 	//TODO remove it

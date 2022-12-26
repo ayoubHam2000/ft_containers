@@ -147,8 +147,24 @@ void evaluateMapResult(int test_nb, const std::string& name){
 	if (test_nb >= MAP_COUNTER){
 		switch (test_nb) {
 			case MAP_COUNTER:
-				std_test.testFunction = &std_test_type::int_map_general_test;
-				//ft_test.testFunction = &ft_test_type::int_map_general_test;
+				std_test.testFunction = &std_test_type::map_general_test1;
+				ft_test.testFunction = &ft_test_type::map_general_test1;
+				break;
+			case MAP_COUNTER + 1:
+				std_test.testFunction = &std_test_type::map_general_test2;
+				ft_test.testFunction = &ft_test_type::map_general_test2;
+				break;
+			case MAP_COUNTER + 2:
+				std_test.testFunction = &std_test_type::map_general_test3;
+				ft_test.testFunction = &ft_test_type::map_general_test3;
+				break;
+			case MAP_COUNTER + 3:
+				std_test.testFunction = &std_test_type::map_general_test4;
+				ft_test.testFunction = &ft_test_type::map_general_test4;
+				break;
+			case MAP_COUNTER + 4:
+				std_test.testFunction = &std_test_type::map_time_general;
+				ft_test.testFunction = &ft_test_type::map_time_general;
 				break;
 			default:
 				std::exit(1);
@@ -184,16 +200,20 @@ void stackTests(){
 
 void setTests(){
 	TestOnType::printSetHeader();
-	//evaluateResult(SET_COUNTER, "set_general_test1");
-	//evaluateResult(SET_COUNTER + 1, "set_general_test2");
-	//evaluateResult(SET_COUNTER + 2, "set_general_test3");
+	evaluateResult(SET_COUNTER, "set_general_test1");
+	evaluateResult(SET_COUNTER + 1, "set_general_test2");
+	evaluateResult(SET_COUNTER + 2, "set_general_test3");
 	evaluateResult(SET_COUNTER + 3, "set_general_test4");
-	//evaluateResult(SET_COUNTER + 4, "set_time_general");
+	evaluateResult(SET_COUNTER + 4, "set_time_general");
 }
 
 void mapTests(){
 	TestOnType::printMapHeader();
-	evaluateMapResult<int, std::string>(MAP_COUNTER, "map_general");
+	//evaluateMapResult<int, int>(MAP_COUNTER, "map_general_test1");
+	//evaluateMapResult<int, int>(MAP_COUNTER + 1, "map_general_test2");
+	//evaluateMapResult<int, int>(MAP_COUNTER + 2, "map_general_test3");
+	//evaluateMapResult<int, int>(MAP_COUNTER + 3, "map_general_test4");
+	evaluateMapResult<int, int>(MAP_COUNTER + 4, "map_time_general");
 }
 
 void mainTests(){
@@ -202,8 +222,8 @@ void mainTests(){
 	FoxerGlobal::init_random_string(RANDOM_SIZE, RANDOM_SEED);
 	//vectorTests();
 	//stackTests();
-	setTests();
-	//mapTests();
+	//setTests();
+	mapTests();
 }
 
 int main(){

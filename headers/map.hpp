@@ -62,6 +62,8 @@ private:
 
 	template <class T, class key_compare>
 	struct Tree_comparator{
+		key_compare comp;
+
 		Tree_comparator(const key_compare &comp = key_compare()): comp(comp)  {}
 		Tree_comparator(const Tree_comparator &other): comp(other.comp)  {}
 		Tree_comparator& operator=(const Tree_comparator &other){
@@ -73,8 +75,7 @@ private:
 			return (comp(x.first, y.first));
 			//return (comp(x, y));
 		}
-	private:
-		key_compare comp;
+
 	};
 
 	typedef Tree_comparator<value_type, key_compare> 					tree_compare;
@@ -86,8 +87,6 @@ public:
 	typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 private:
 	tree 			_tree;
-	key_compare 	_key_com;
-	allocator_type	_alloc;
 public:
 	/*****************************************************************/
 	// Constructors
@@ -99,7 +98,7 @@ public:
 		const key_compare& comp = key_compare(),
 		const allocator_type& alloc = allocator_type()
 		)
-			: _tree(tree_compare(comp), alloc), _key_com(comp), _alloc(alloc)
+			: _tree(tree_compare(comp), alloc)
 	{}
 
 	template <class InputIterator>
@@ -111,17 +110,15 @@ public:
 		>::type last,
 		const key_compare& comp = key_compare(),
 		const allocator_type& alloc = allocator_type()
-		) : _tree(first, last, tree_compare(comp), alloc), _key_com(comp), _alloc(alloc)
+		) : _tree(first, last, tree_compare(comp), alloc)
 	{}
 
 	map (const map& x)
-	: _tree(x._tree), _key_com(x._key_com), _alloc(x._alloc)
+	: _tree(x._tree)
 	{}
 
 	map& operator=(const map& x){
 		this->_tree = x._tree;
-		this->_alloc = x._alloc;
-		this->_key_com = x._key_com;
 		return (*this);
 	}
 
@@ -233,7 +230,7 @@ public:
 		return (ft::make_pair(_tree.find(val), oldSize != _tree.size()));
 	}
 
-	iterator insert (iterator position, const_reference val){
+	iterator insert (const_iterator position, const_reference val){
 		_tree.insert(position, val);
 		return (_tree.find(val));
 	}
@@ -244,7 +241,7 @@ public:
 	}
 
 
-	void erase (iterator position){
+	void erase (const_iterator position){
 		_tree.remove(*position);
 	}
 
@@ -254,7 +251,7 @@ public:
 		return (oldSize != _tree.size());
 	}
 
-	void erase (iterator first, iterator last){
+	void erase (const_iterator first, const_iterator last){
 		_tree.remove(first, last);
 	}
 
@@ -271,7 +268,7 @@ public:
 	/*****************************************************************/
 
 	key_compare key_comp() const{
-		return (key_compare(_key_com));
+		return (key_compare(_tree.key_comp().comp));
 	}
 
 	value_compare value_comp() const{
@@ -279,7 +276,7 @@ public:
 	}
 
 	allocator_type get_allocator() const{
-		return (allocator_type(_alloc));
+		return (allocator_type(_tree.get_allocator()));
 	}
 
 	//TODO remove it

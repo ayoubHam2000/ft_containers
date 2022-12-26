@@ -21,6 +21,15 @@ bool operator!=(const std::pair<_T1, _T2> &x, const ft::pair<_T1, _T2> &y)
 	return (!(x == y));
 }
 
+template <class T1, class T2>
+std::istream& operator>>(std::istream& is, std::pair<T1, T2>& p)
+{
+	is >> p.first;
+	p.second = T2();
+	return is;
+}
+
+//TODO: capacity
 template <class containerType>
 class TestOn{
 #pragma region Head
@@ -30,11 +39,11 @@ public:
 	typedef void (TestOn::* functionPointer)();
 	//typedef std::vector<int> container;
 public:
-	std::list<value_type> 		c;
-	time_t						time;
-	statistic_tracker			s_tracker;
-	std::string 				name;
-	functionPointer 			testFunction;
+	std::list<value_type> 			c;
+	time_t							time;
+	statistic_tracker				s_tracker;
+	std::string 					name;
+	functionPointer 				testFunction;
 
 public:
 	TestOn() : c(), time(0) {}
@@ -71,6 +80,7 @@ public:
 		int *p;
 
 		Object(): i(), p(nullptr){}
+		explicit Object(int i): i(i), p(nullptr){}
 		Object(const Object& other): i(other.i), p(nullptr){
 			if (other.p){
 				p = new int();
@@ -113,12 +123,14 @@ public:
 		}
 		~CustomComparator(){};
 
-		bool operator()(const value_type& x, const value_type& y) const
+		bool operator()(const Tp& x, const Tp& y) const
 		{
 			state++;
 			return x < y;
 		}
 	};
+
+
 
 
 #pragma endregion
@@ -684,8 +696,8 @@ public:
 		//swap
 
 
-		typedef ft::set<int, std::less<int> > type;
-		//typedef container type;
+		//typedef ft::set<int, std::less<int> > type;
+		typedef container type;
 
 		std::vector<value_type> arr(FoxerGlobal::random_values_int.begin(), FoxerGlobal::random_values_int.begin() + 1000);
 
@@ -899,7 +911,7 @@ public:
 	}
 
 	void set_general_test4(){
-		// key_comp, value_comp
+		// key_comp, value_comp, max_size, lower_bound, upper_bound, equal_range
 
 		//typedef std::set<int> type;
 		typedef container type;
@@ -938,7 +950,7 @@ public:
 		bool is_std = std::is_same<type , std::set<typename type::value_type, typename  type::key_compare, typename type::allocator_type> >::value;
 		if (is_std){
 			typedef CustomComparator<int> the_cmp;
-			typedef std::set<int, the_cmp > new_type;
+			typedef std::set<int, the_cmp, track_allocator<int> > new_type;
 
 			the_cmp compare;
 			compare.state++;
@@ -946,26 +958,26 @@ public:
 			for (int i = 0; i < 55; i++)
 				a_set.insert(i);
 			new_type b_set(compare);
-			int res = b_set.key_comp().state;
-			res = a_set.key_comp().state;
-			c.push_back(res);
+			new_type c_set(a_set.key_comp());
+			c.push_back(int(b_set.key_comp().state == a_set.key_comp().state));
+			c.push_back(int(c_set.key_comp().state == a_set.key_comp().state));
 		}else{
 			typedef CustomComparator<int> the_cmp;
-			typedef ft::set<int, the_cmp > new_type;
+			typedef ft::set<int, the_cmp, track_allocator<int> > new_type;
 
 			the_cmp compare;
 			compare.state++;
 			new_type a_set(compare);
-			//for (int i = 0; i < 55; i++)
-			a_set.insert(80);
-			a_set.insert(99);
+			for (int i = 0; i < 55; i++)
+				a_set.insert(i);
 			new_type b_set(compare);
-			int res = b_set.key_comp().state;
-			res = a_set.key_comp().state;
-			c.push_back(res);
+			new_type c_set(a_set.key_comp());
+			c.push_back(int(b_set.key_comp().state == a_set.key_comp().state));
+			c.push_back(int(c_set.key_comp().state == a_set.key_comp().state));
 		}
 
 	}
+
 
 	//////////
 	//Speed///
@@ -1014,14 +1026,14 @@ public:
 			size_t size = TREE_SIZE_TEST * 2;
 			obj_set set;
 			for (int i = 0; i < size; i++){
-				set.insert(Object());
+				set.insert(Object(i));
 			}
 		}else{
 			typedef ft::set<Object, std::less<Object>, obj_allocator_type> obj_set;
 			size_t size = TREE_SIZE_TEST * 2;
 			obj_set set;
 			for (int i = 0; i < size; i++){
-				set.insert(Object());
+				set.insert(Object(i));
 			}
 		}
 
@@ -1038,10 +1050,10 @@ public:
 			typedef std::set<Object, std::less<Object>, obj_allocator_type> obj_set;
 
 			size_t size = TREE_SIZE_TEST;
-			type set;
+			obj_set set;
 
 			for (int i = 0; i < size; i++)
-				set.insert(i);
+				set.insert(Object(i));
 			time = get_time();
 			while (!set.empty()){
 				set.erase(set.begin());
@@ -1052,10 +1064,10 @@ public:
 			typedef std::set<Object, std::less<Object>, obj_allocator_type> obj_set;
 
 			size_t size = TREE_SIZE_TEST;
-			type set;
+			obj_set set;
 
 			for (int i = 0; i < size; i++)
-				set.insert(i);
+				set.insert(Object(i));
 			time = get_time();
 			while (!set.empty()){
 				set.erase(set.begin());
@@ -1149,17 +1161,498 @@ public:
 
 #pragma region MapTest
 
-void int_map_general_test(){
-	typedef container map_type;
-	typedef typename map_type::value_type map_value_type;
-	map_type map;
-	for (int i = 0; i < 100000; i++){
-		map_value_type p = map_value_type (get_random_int(i) + i, get_random_string(i));
-		map.insert(p);
-	}
-	c.insert(c.begin(), map.begin(),   map.end());
-}
+//TODO custom key_compare
+public:
+	void map_general_test1(){
+		//constructors, all iterators, destructor, copy constructor and Assignment
+		//size and max_size
+		//swap
 
+
+		//typedef std::map<int, int, std::less<int> > type;
+		typedef container type;
+		typedef typename type::value_type map_value_type;
+
+		std::vector<map_value_type> arr;
+		for (int i = 0; i < TREE_SIZE_TEST; i++){
+			arr.push_back(map_value_type(FoxerGlobal::random_values_int[i], FoxerGlobal::random_values_int[i]));
+		}
+
+		type a;
+		type e(arr.begin(), arr.end());
+		const type f(e);
+		const type h(f);
+		e = f;
+		type g(f);
+
+		swap(a, e);
+		swap(e, a);
+		a.swap(e);
+		e.swap(a);
+
+		c.insert(c.begin(), a.begin(),   a.end());
+		c.insert(c.begin(), a.cbegin(),  a.cend());
+		c.insert(c.begin(), a.rbegin(),  a.rend());
+		c.insert(c.begin(), a.crbegin(), a.crend());
+
+		c.insert(c.begin(), h.begin(),   h.end());
+		c.insert(c.begin(), h.cbegin(),  h.cend());
+		c.insert(c.begin(), h.rbegin(),  h.rend());
+		c.insert(c.begin(), h.crbegin(), h.crend());
+
+		c.insert(c.begin(), e.begin(),   e.end());
+		c.insert(c.begin(), e.cbegin(),  e.cend());
+		c.insert(c.begin(), e.rbegin(),  e.rend());
+		c.insert(c.begin(), e.crbegin(), e.crend());
+
+		c.insert(c.begin(), f.begin(),   f.end());
+		c.insert(c.begin(), f.cbegin(),  f.cend());
+		c.insert(c.begin(), f.rbegin(),  f.rend());
+		c.insert(c.begin(), f.crbegin(), f.crend());
+
+		c.insert(c.begin(), g.begin(),   g.end());
+		c.insert(c.begin(), g.cbegin(),  g.cend());
+		c.insert(c.begin(), g.rbegin(),  g.rend());
+		c.insert(c.begin(), g.crbegin(), g.crend());
+	}
+
+	void map_general_test2(){
+		//==, !=, <, >, >=, <=
+		//insert
+		//find, count, clear
+
+		//typedef ft::map<int, int, std::less<int> > type;
+		typedef container type;
+		typedef typename type::iterator iterator;
+		typedef typename type::const_iterator const_iterator;
+		typedef typename type::value_type map_value_type;
+
+		std::vector<map_value_type> arr;
+		for (int i = 0; i < TREE_SIZE_TEST; i++){
+			arr.push_back(map_value_type(FoxerGlobal::random_values_int[i], FoxerGlobal::random_values_int[i]));
+		}
+
+
+		type a;
+		type b(arr.begin(), arr.end());
+		const type f(b);
+		const type h(f);
+		b = f;
+		type g(f);
+
+		//1
+		b.insert(arr.begin(), arr.begin() + 50);
+		b.insert(arr.begin(), arr.begin() + 20);
+		b.insert(arr.begin(), arr.begin() + 20);
+		b.insert(arr.begin(), arr.begin() + 20);
+		b.insert(arr.begin(), arr.begin() + 20);
+		b.insert(arr.begin(), arr.begin() + 20);
+		b.insert(map_value_type(10, 88));
+
+		iterator it = b.begin();
+		std::advance(it, 10);
+		b.insert(it, map_value_type(30, 88));
+		std::advance(it, -1);
+		b.insert(it, map_value_type(99999999, 88));
+
+		const_iterator c_it = b.begin();
+		std::advance(c_it, 9);
+		b.insert(c_it, map_value_type(45, 88));
+		std::advance(c_it, 3);
+		b.insert(c_it, map_value_type(99989999, 88));
+
+		b.insert(--b.end(), map_value_type(79, 88));
+		b.insert(++b.begin(), map_value_type(80, 88));
+		b.insert(++b.begin() , map_value_type(94, 88));
+		b.insert(map_value_type(99989999, 75));
+		b.insert(map_value_type(99989999, 76));
+		g.insert(map_value_type(99989999, 77));
+		c.insert(c.begin(), b.begin(), b.end());
+		c.insert(c.begin(), g.crbegin(), g.crend());
+		c.insert(c.begin(), a.begin(), a.end());
+
+
+
+		a.insert(arr.begin(), arr.end());
+		iterator start = b.begin();
+		const_iterator s_start = start;
+		iterator end = b.end();
+		while (s_start != end){
+			iterator isFound = a.find(s_start->first);
+			if (isFound == a.end()) {
+				c.push_back(map_value_type(-1, 77));
+			}
+			else {
+				c.push_back(*isFound);
+			}
+			c.push_back(map_value_type(a.count(s_start->first), 77));
+			s_start++;
+		}
+
+		//3
+		c.push_back(map_value_type(int(a == b), 77));
+		c.push_back(map_value_type(int(a != b), 77));
+		c.push_back(map_value_type(int(a < b), 77));
+		c.push_back(map_value_type(int(a > b), 77));
+		c.push_back(map_value_type(int(a <= b), 77));
+		c.push_back(map_value_type(int(a >= b), 77));
+		a.clear();
+		a.insert(b.begin(), b.end());
+		c.push_back(map_value_type(int(a == b), 77));
+		c.push_back(map_value_type(int(a != b), 77));
+		c.push_back(map_value_type(int(a < b), 77));
+		c.push_back(map_value_type(int(a > b), 77));
+		c.push_back(map_value_type(int(a <= b), 77));
+		c.push_back(map_value_type(int(a >= b), 77));
+		c.insert(c.begin(), a.begin(),   a.end());
+
+	}
+
+	void map_general_test3(){
+		//erase
+		//empty
+		//get_allocator, key_comp, value_comp
+
+		//typedef std::map<int, int, std::less<int> > type;
+		typedef container type;
+		typedef typename type::iterator iterator;
+		typedef typename type::const_iterator const_iterator;
+		typedef typename type::value_type map_value_type;
+
+		std::vector<map_value_type> arr;
+		for (int i = 0; i < TREE_SIZE_TEST; i++){
+			arr.push_back(map_value_type(FoxerGlobal::random_values_int[i], FoxerGlobal::random_values_int[i]));
+		}
+
+		type a;
+		type b(arr.begin(), arr.end());
+		const type f(b);
+		const type h(f);
+		b = f;
+		type g(f);
+
+		//1
+		b.insert(arr.begin(), arr.begin() + 200);
+		c.insert(c.begin(), b.begin(),   b.end());
+
+		//2
+		while (!b.empty()) {
+			b.erase(b.begin());
+		}
+		c.insert(c.begin(), b.begin(),   b.end());
+
+		//3
+		b.insert(arr.begin(), arr.begin() + 200);
+		b.erase(b.begin(), b.end());
+
+		//4
+		//4
+		b.insert(arr.begin(), arr.begin() + 200);
+		iterator it = b.begin();
+		std::advance(it, 10);
+		b.erase(it);
+		it = b.begin();
+		std::advance(it, 10);
+		std::advance(it, -5);
+		b.erase(it);
+		it = b.end();
+		it--;
+		b.erase(it);
+		c.insert(c.begin(), b.begin(),   b.end());
+
+		//5
+		//4
+		b.insert(arr.begin(), arr.begin() + 200);
+		iterator s = b.begin();
+		iterator end = b.end();
+		while (s != end){
+			typename type::size_type res = b.erase((s++)->first);
+			c.push_back(map_value_type(res, 77));
+			res = b.erase(std::rand() % RANDOM_SIZE);
+			c.push_back(map_value_type(res, 77));
+		}
+
+
+		//4
+		while (!b.empty())
+			b.erase(b.begin());
+		c.insert(c.begin(), b.begin(),   b.end());
+
+		//5
+		map_value_type *p = a.get_allocator().allocate(1);
+		a.get_allocator().construct(p, map_value_type(20, 77));
+		a.get_allocator().destroy(p);
+		a.get_allocator().deallocate(p, 1);
+
+		//6
+		typename type::key_compare cmp = a.key_comp();
+		c.push_back(map_value_type(int(cmp(10, 20)), 77));
+		c.push_back(map_value_type(int(cmp(20, 10)), 77));
+
+		//7
+		typename type::value_compare cmp2 = a.value_comp();
+		c.push_back(map_value_type(int(cmp(10, 20)), 77));
+		c.push_back(map_value_type(int(cmp(20, 10)), 77));
+
+	}
+
+	void map_general_test4(){
+		// key_comp, value_comp, max_size, lower_bound, upper_bound, equal_range
+
+		//typedef std::map<int, int, std::less<int> > type;
+		typedef container type;
+		typedef typename type::iterator iterator;
+		typedef typename type::const_iterator const_iterator;
+		typedef typename type::value_type map_value_type;
+
+		std::vector<map_value_type> arr;
+		for (int i = 0; i < TREE_SIZE_TEST; i++){
+			arr.push_back(map_value_type(FoxerGlobal::random_values_int[i], FoxerGlobal::random_values_int[i]));
+		}
+
+		type b(arr.begin(), arr.end());
+		const type a(b);
+
+		iterator s = b.lower_bound(99999999);
+		iterator c_s = b.lower_bound(99999999);
+		c.push_back(value_type(int(b.end() == s), 77));
+		c.push_back(value_type(int(b.end() == c_s), 77));
+
+		s = b.upper_bound(99999999);
+		c_s = b.upper_bound(99999999);
+		c.push_back(value_type(int(b.end() == s), 77));
+		c.push_back(value_type(int(b.end() == c_s), 77));
+
+		std::pair<iterator, iterator> range;
+		range.first = b.equal_range(b.begin()->first).first;
+		range.second = b.equal_range(b.begin()->first).second;
+		for (iterator it = range.first; it != range.second; ++it){
+			c.push_back(*it);
+		}
+
+		range.first = b.lower_bound(b.begin()->first);
+		s = b.begin();
+		std::advance(s, 10);
+		range.second = b.upper_bound(s->first);
+		for (iterator it = range.first; it != range.second; ++it){
+			c.push_back(*it);
+		}
+
+		bool is_std = std::is_same<type , std::map<int, int, typename type::key_compare , typename type::allocator_type> >::value;
+		if (is_std){
+			typedef CustomComparator<int> the_cmp;
+			typedef std::map<int, int, the_cmp > new_type;
+
+			the_cmp compare;
+			compare.state++;
+			new_type a_map(compare);
+			for (int i = 0; i < 55; i++)
+				a_map.insert(std::make_pair(i, 77));
+			new_type b_set(compare);
+			new_type c_set(a_map.key_comp());
+			c.push_back(value_type(int(b_set.key_comp().state == a_map.key_comp().state), 77));
+			c.push_back(value_type(int(c_set.key_comp().state == a_map.key_comp().state), 77));
+		}else{
+			typedef CustomComparator<int> the_cmp;
+			typedef ft::map<int, int, the_cmp > new_type;
+
+			the_cmp compare;
+			compare.state++;
+			new_type a_map(compare);
+			for (int i = 0; i < 55; i++)
+				a_map.insert(ft::make_pair(i, 77));
+			new_type b_set(compare);
+			new_type c_set(a_map.key_comp());
+			c.push_back(value_type(int(b_set.key_comp().state == a_map.key_comp().state), 77));
+			c.push_back(value_type(int(c_set.key_comp().state == a_map.key_comp().state), 77));
+		}
+
+	}
+
+
+	//////////
+	//Speed///
+	/////////
+
+	void map_time_insert(){
+		//typedef std::map<int, int> type;
+		typedef container type;
+		typedef typename type::value_type map_value_type;
+
+		size_t size = TREE_SIZE_TEST;
+		type map;
+
+		for (int i = 0; i < size; i++){
+			map.insert(map_value_type(i, 77));
+			map.insert(map.begin(), map_value_type(i, 77));
+			map.insert(map.end(), map_value_type(i, 77));
+		}
+		c.insert(c.begin(), map.begin(), map.end());
+	}
+
+	void map_time_erase(){
+		//typedef std::map<int, int> type;
+		typedef container type;
+		typedef typename type::value_type map_value_type;
+
+		std::vector<map_value_type> arr;
+		for (int i = 0; i < TREE_SIZE_TEST; i++){
+			arr.push_back(map_value_type(FoxerGlobal::random_values_int[i], FoxerGlobal::random_values_int[i]));
+		}
+
+		size_t size = TREE_SIZE_TEST;
+		type map;
+
+		for (int i = 0; i < 100; i++)
+			map.insert(arr.begin(), arr.begin() + i * 10);
+		time = get_time();
+		typename type::iterator it = map.begin();
+		typename type::iterator e = map.end();
+		while (it != e){
+			map.erase((it++)->first);
+		}
+	}
+
+	void map_time_obj_insert(){
+		typedef container type;
+		//typedef std::map<int, int> type;
+		typedef typename type::value_type map_value_type;
+
+		bool is_std = std::is_same<type , std::set<typename type::value_type, typename  type::key_compare, typename type::allocator_type> >::value;
+
+		if (is_std){
+			typedef std::map<Object, int, std::less<Object> > obj_map;
+			size_t size = TREE_SIZE_TEST * 2;
+			obj_map map;
+			for (int i = 0; i < size; i++){
+				map.insert(std::make_pair(Object(), 77));
+			}
+		}else{
+			typedef ft::map<Object, int, std::less<Object> > obj_map;
+			size_t size = TREE_SIZE_TEST * 2;
+			obj_map map;
+			for (int i = 0; i < size; i++){
+				map.insert(ft::make_pair(Object(), 77));
+			}
+		}
+
+	}
+
+	void map_time_obj_erase(){
+		typedef std::map<int, int> type;
+		//typedef container type;
+		typedef typename type::value_type map_value_type;
+
+		bool is_std = std::is_same<type , std::set<typename type::value_type, typename  type::key_compare, typename type::allocator_type> >::value;
+
+		if (is_std){
+			typedef std::map<Object, int, std::less<Object> > obj_map;
+
+			size_t size = TREE_SIZE_TEST;
+			obj_map map;
+
+			for (int i = 0; i < size; i++)
+				map.insert(std::make_pair(Object(i), 10));
+			time = get_time();
+			while (!map.empty()){
+				map.erase(map.begin());
+			}
+
+
+		}else{
+			typedef ft::map<Object,int, std::less<Object> > obj_map;
+
+			size_t size = TREE_SIZE_TEST;
+			obj_map map;
+
+			for (int i = 0; i < size; i++)
+				map.insert(ft::make_pair(Object(i), 10));
+			time = get_time();
+			while (!map.empty()){
+				map.erase(map.begin());
+			}
+		}
+
+	}
+
+	void map_time_iter(){
+		typedef container type;
+		//typedef std::map<int, int> type;
+		typedef typename type::value_type map_value_type;
+
+
+
+		size_t size = TREE_SIZE_TEST;
+		type map;
+
+		for (int i = 0; i < size; i++){
+			map.insert(map_value_type(i, 77));
+		}
+
+		typename type::iterator it = map.begin();
+		for (int i = 0; i < 1000000; i++){
+			it++;
+			--it;
+			++it;
+			it--;
+			map.cbegin();
+			map.crbegin();
+			map.cend();
+			map.crend();
+		}
+	}
+
+	void map_time_from_input_iter(){
+		//typedef container type;
+		//typedef typename type::value_type map_value_type;
+		typedef std::map<int, int> type;
+
+		std::stringstream stream;
+
+		// Write some pairs to the stream
+		stream << "1 2";
+
+		// Read the pairs from the stream
+		std::istringstream str(stream.str());
+		std::istream_iterator<std::pair<int, int> > it(str), end;
+
+		/*type map(it, end);
+		c.insert(c.begin(), map.begin(), map.end());
+		map.clear();
+
+		it = str2;
+		map.insert(it, end);
+		c.insert(c.begin(), map.begin(), map.end());*/
+	}
+
+	/////////////////////////
+
+	void map_time_general(){
+		typedef container type;
+
+		//typedef std::set<int> type;
+
+		bool is_std = std::is_same<type , std::set<typename type::value_type, typename  type::key_compare, typename type::allocator_type> >::value;
+		run_test_speed(is_std, &TestOn<container>::map_time_insert, "map_time_insert");
+		run_test_speed(is_std, &TestOn<container>::map_time_erase, "map_time_erase");
+		run_test_speed(is_std, &TestOn<container>::map_time_obj_insert, "map_time_obj_insert");
+		run_test_speed(is_std, &TestOn<container>::map_time_obj_erase, "map_time_obj_erase");
+		run_test_speed(is_std, &TestOn<container>::map_time_iter, "map_time_iter");
+		run_test_speed(is_std, &TestOn<container>::map_time_from_input_iter, "map_time_from_input_iter");
+
+		std::vector<std::pair<time_t, std::string> >::size_type time_size = FoxerGlobal::save_time.size();
+		int i = 0;
+		if (!is_std){
+			i = time_size / 2;
+			print_time_test();
+			std::cout << "Total: " << std::endl;
+		}
+		time = 0;
+		for (;i < time_size; i++)
+			time += FoxerGlobal::save_time[i].first;
+		time *= -1;
+
+	}
 #pragma endregion
 
 #pragma region Display

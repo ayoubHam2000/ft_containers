@@ -18,29 +18,43 @@ public:
 	typedef const T&       const_reference;
 	typedef std::size_t    size_type;
 	typedef std::ptrdiff_t difference_type;
-	
+
+	int state;
+
 	template <typename U>
 	struct rebind {
 		typedef track_allocator<U> other;
 	};
 
 public:
-	track_allocator()
+	track_allocator() : state(0)
 	{
 	}
 
-	track_allocator(const track_allocator&)
+	track_allocator(const track_allocator& other):state(other.state)
 	{
 	}
 
 	template <typename U>
-	track_allocator(const track_allocator<U>&)
+	track_allocator(const track_allocator<U>& other):state(other.state)
 	{
 	}
 
 	~track_allocator()
 	{
 	}
+
+	track_allocator& operator=(const track_allocator& other){
+		this->state = other.state;
+		return (*this);
+	}
+
+	template <typename U>
+	track_allocator& operator=(const track_allocator<U>& other){
+		this->state = other.state;
+		return(*this);
+	}
+
 
 public:
 	bool operator==(const track_allocator&)
@@ -69,6 +83,7 @@ public:
 		T* block = std::allocator<T>().allocate(n, hint);
 		memory_tracker::add_allocation((void*)block, n);
 		memory_tracker::s.nb_allocation++;
+		state++;
 		return block;
 	}
 

@@ -694,6 +694,14 @@ public:
 		}
 	}
 
+	value_compare key_comp() const{
+		return value_compare(_comp);
+	}
+
+	allocator_type get_allocator() const{
+		return allocator_type();
+	}
+
 	void swap(BinaryTree &x){
 		ft::swap(x._dummyMax.parent, _dummyMax.parent);
 		ft::swap(x._dummyMin.parent, _dummyMin.parent);
@@ -728,20 +736,8 @@ public:
 	 * because the value can be larger than the grandparent (if it exist)
 	 * pre-requisite root should be != null
 	 */
+	 //TODO: improve
 	void insert(const_iterator position, const_reference value){
-		/*nodePointer root = const_cast<nodePointer>(position.base() ? position.base() : _dummyMax.parent);
-		nodePointer parent;
-
-		if (root){
-			while (this->_comp(root->data, value)){
-				parent = root->parent;
-				if (parent && this->_comp(parent->data, value))
-					root = parent;
-				else
-					break;
-			}
-		}
-		nodePointer &ref = root ? root->getRef(this->_parent) : this->_parent;*/
 		insert(_parent, value);
 	}
 
