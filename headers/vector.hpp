@@ -162,7 +162,7 @@ namespace ft{
 		 * @return iterator An iterator that points to the first of the newly inserted
 		 * elements.
 		 */
-		iterator insert (iterator position, const_reference val){
+		iterator insert (const_iterator position, const_reference val){
 			size_type pos 		= static_cast<size_type>(&(*position) - _first);
 			pointer	  old_last 	= _last;
 
@@ -186,7 +186,7 @@ namespace ft{
 		 * @param n Amout of element to insert.
 		 * @param val The element to insert.
 		 */
-		void insert (iterator position, size_type n, const_reference val){
+		void insert (const_iterator position, size_type n, const_reference val){
 			size_type pos 			= static_cast<size_type>(&(*position) - _first);
 			pointer	  old_last 		= _last;
 
@@ -217,7 +217,7 @@ namespace ft{
 		*/
 		template <class InputIterator>
 		void insert (
-				iterator position,
+				const_iterator position,
 				InputIterator first,
 				typename enable_if<
 						ft::is_valid_forward_iterator<value_type, InputIterator>::value,
@@ -247,7 +247,7 @@ namespace ft{
 
 		template <class InputIterator>
 		void insert (
-				iterator position,
+				const_iterator position,
 				InputIterator first,
 				typename enable_if<
 						ft::is_valid_input_iterator<value_type, InputIterator>::value &&
@@ -273,13 +273,13 @@ namespace ft{
 		 * @return An iterator pointing to the new location of the element that followed the last element erased by
 		 * 	the function call. This is the container end if the operation erased the last element in the sequence.
 		 */
-		iterator erase (iterator position){
+		iterator erase (const_iterator position){
 			size_type pos = static_cast<size_type>(&(*position) - _first);
 			_shift_to_left(pos, 1);
 			return (iterator(_first + pos));
 		}
 
-		iterator erase (iterator first, iterator last){
+		iterator erase (const_iterator first, iterator last){
 			size_type pos = static_cast<size_type>(&(*first) - _first);
 			size_type n = static_cast<size_type>(distance_iterator(first, last));
 			_shift_to_left(pos, n);
@@ -678,6 +678,8 @@ namespace ft{
 		}
 
 		void _add_space(size_type pos, size_type nb_shift){
+			if (nb_shift > this->max_size())
+				_throw_max_size();
 			_add_space(pos, nb_shift, __get_new_capacity(capacity() + nb_shift));
 		}
 
@@ -704,9 +706,9 @@ namespace ft{
 					--src;
 				}
 				while (size_copy--){
-					(*dist) = (*src);
-					--dist;
-					--src;
+					(*dist--) = (*src--);
+					//--dist;
+					//--src;
 				}
 			}
 			return (false);
@@ -823,9 +825,8 @@ namespace ft{
 		return (!operator<(lhs, rhs));
 	}
 
-	//TODO Why
 	template <class T, class Alloc>
-	void swap (vector<T,Alloc>& x, vector<T,Alloc>& y){
+	void swap (vector<T, Alloc>& x, vector<T, Alloc>& y){
 		x.swap(y);
 	}
 

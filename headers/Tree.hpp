@@ -70,7 +70,7 @@ public:
 			color(other.color)
 	{}
 
-	virtual ~BinaryNode(){}
+	~BinaryNode(){}
 
 	BinaryNode& operator=(const BinaryNode& other){
 		data = other.data;
@@ -131,7 +131,7 @@ public:
 		return (nullptr);
 	}
 
-	virtual int	getColor() const{
+	int	getColor() const{
 		return (this->color);
 	}
 
@@ -776,6 +776,7 @@ protected:
 protected:
 	nodePointer	constructNode(const_reference value, const nodePointer parent = nullptr){
 		nodePointer node = this->_node_alloc.allocate(1);
+		//new (node) nodeType(value, parent);
 		this->_node_alloc.construct(node, nodeType(value, parent));
 		this->_size++;
 		if (_dummyMax.parent == nullptr || _comp(_dummyMax.parent->data, value))
@@ -787,6 +788,7 @@ protected:
 
 	nodePointer constructNode(const nodePointer other){
 		nodePointer node = this->_node_alloc.allocate(1);
+		//new (node) nodeType(*other);
 		this->_node_alloc.construct(node, nodeType(*other));
 		this->_size++;
 		if (_dummyMax.parent == nullptr || _comp(_dummyMax.parent->data, other->data))
@@ -1278,7 +1280,7 @@ private:
 		while (node){
 			if (this->_comp(value, node->data))
 				node = node->leftChild;
-			else if (value > node->data)
+			else if (this->_comp(node->data, value))
 				node = node->rightChild;
 			else
 				break ;

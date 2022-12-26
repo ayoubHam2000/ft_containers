@@ -32,4 +32,9 @@
 #define WHITE "\x1B[1;39m"
 #define RESET "\e[0m"
 
+#define RANDOM_SIZE 10000
+#define SIZE_TEST 5000
+#define TREE_SIZE_TEST 50000
+#define RANDOM_SEED 10
+
 #endif //FT_CONTAINERS_COMMON_H

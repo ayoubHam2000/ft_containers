@@ -1,82 +1,212 @@
 #include "headers/ft_containers_foxer_test/foxer.h"
 
+#define VEC_COUNTER 0
+#define STA_COUNTER 100
+#define SET_COUNTER 200
+#define MAP_COUNTER 300
 
 
-template <typename std_container, typename ft_container>
-void evaluateResult(TestOn<std_container>& std_test, TestOn<ft_container>& ft_test)
+
+void evaluateResult(int test_nb, const std::string& name)
 {
-	std_test.run();
-	ft_test.run();
-	TestOnType::printResult(std_test, ft_test);
-	std_test.reset();
-	ft_test.reset();
+	typedef track_allocator<int> allocator;
+
+	typedef std::vector<int, allocator> std_vector_type;
+	typedef ft::vector<int, allocator> ft_vector_type;
+
+	typedef std::stack<int, std_vector_type> std_stack_type;
+	typedef ft::stack<int, ft_vector_type> ft_stack_type;
+
+	typedef std::set<int, std::less<int>, allocator> std_set_type;
+	typedef ft::set<int, std::less<int>, allocator> ft_set_type;
+
+	if (test_nb < STA_COUNTER){ //vector
+		typedef TestOn<std_vector_type> std_test_type;
+		typedef TestOn<ft_vector_type> ft_test_type;
+
+		std_test_type std_test;
+		ft_test_type ft_test;
+
+		std_test.name = name;
+		switch (test_nb) {
+			case (VEC_COUNTER):
+				std_test.testFunction = &std_test_type::int_vector_general_test1;
+				ft_test.testFunction = &ft_test_type::int_vector_general_test1;
+				break;
+			case (VEC_COUNTER + 1):
+				std_test.testFunction = &std_test_type::int_vector_general_test2;
+				ft_test.testFunction = &ft_test_type::int_vector_general_test2;
+				break;
+			case (VEC_COUNTER + 2):
+				std_test.testFunction = &std_test_type::int_vector_general_test3;
+				ft_test.testFunction = &ft_test_type::int_vector_general_test3;
+				break;
+			case (VEC_COUNTER + 3):
+				std_test.testFunction = &std_test_type::int_vector_general_test4;
+				ft_test.testFunction = &ft_test_type::int_vector_general_test4;
+				break;
+			case (VEC_COUNTER + 4):
+				std_test.testFunction = &std_test_type::int_vector_time_general;
+				ft_test.testFunction = &ft_test_type::int_vector_time_general;
+				break;
+			default:
+				std::exit(1);
+		}
+
+		std_test.run();
+		ft_test.run();
+		std_test_type::printResult(std_test, ft_test);
+		std_test.reset();
+		ft_test.reset();
+	}
+	else if (test_nb < SET_COUNTER){ //stack
+		typedef TestOn<std_stack_type> std_test_type;
+		typedef TestOn<ft_stack_type> ft_test_type;
+
+		std_test_type std_test;
+		ft_test_type ft_test;
+
+		std_test.name = name;
+		switch (test_nb) {
+			case (STA_COUNTER):
+				std_test.testFunction = &std_test_type::stack_general_test1;
+				ft_test.testFunction = &ft_test_type::stack_general_test1;
+				break;
+			case (STA_COUNTER + 1):
+				std_test.testFunction = &std_test_type::stack_general_test2;
+				ft_test.testFunction = &ft_test_type::stack_general_test2;
+				break;
+			default:
+				std::exit(1);
+		}
+
+		std_test.run();
+		ft_test.run();
+		std_test_type::printResult(std_test, ft_test);
+		std_test.reset();
+		ft_test.reset();
+	}
+	else if (test_nb < MAP_COUNTER){ //set
+		typedef TestOn<std_set_type> std_test_type;
+		typedef TestOn<ft_set_type> ft_test_type;
+
+		std_test_type std_test;
+		ft_test_type ft_test;
+
+		std_test.name = name;
+		switch (test_nb) {
+			case SET_COUNTER:
+				std_test.testFunction = &std_test_type::set_general_test1;
+				ft_test.testFunction = &ft_test_type::set_general_test1;
+				break;
+			case SET_COUNTER + 1:
+				std_test.testFunction = &std_test_type::set_general_test2;
+				ft_test.testFunction = &ft_test_type::set_general_test2;
+				break;
+			case SET_COUNTER + 2:
+				std_test.testFunction = &std_test_type::set_general_test3;
+				ft_test.testFunction = &ft_test_type::set_general_test3;
+				break;
+			case SET_COUNTER + 3:
+				std_test.testFunction = &std_test_type::set_general_test4;
+				ft_test.testFunction = &ft_test_type::set_general_test4;
+				break;
+			case SET_COUNTER + 4:
+				std_test.testFunction = &std_test_type::set_time_general;
+				ft_test.testFunction = &ft_test_type::set_time_general;
+				break;
+			default:
+				std::exit(1);
+		}
+
+		std_test.run();
+		ft_test.run();
+		std_test_type::printResult(std_test, ft_test);
+		std_test.reset();
+		ft_test.reset();
+	}
+	else
+		exit(1);
 }
 
-struct Object{
-	int i;
-	int *p;
+template <class key, class value>
+void evaluateMapResult(int test_nb, const std::string& name){
+	typedef track_allocator<std::pair<const key, value> > std_allocator;
+	typedef track_allocator<ft::pair<const key, value> > ft_allocator;
 
-	Object(): i(), p(nullptr){}
-	Object(const Object& other): i(other.i), p(nullptr){
-		if (other.p){
-			p = new int();
-			*p = *other.p;
+	typedef std::map<key, value, std::less<key>, std_allocator> std_map_type;
+	typedef ft::map<key, value, std::less<key>, ft_allocator> ft_map_type;
+
+	typedef TestOn<std_map_type> std_test_type;
+	typedef TestOn<ft_map_type> ft_test_type;
+
+	std_test_type std_test;
+	ft_test_type ft_test;
+
+	std_test.name = name;
+	if (test_nb >= MAP_COUNTER){
+		switch (test_nb) {
+			case MAP_COUNTER:
+				std_test.testFunction = &std_test_type::int_map_general_test;
+				//ft_test.testFunction = &ft_test_type::int_map_general_test;
+				break;
+			default:
+				std::exit(1);
 		}
-	}
-	~Object(){
-		delete p;
-	}
-	Object& operator=(const Object& other){
-		Object tmp(other);
-		delete p;
-		i = other.i;
-		p = other.p;
-		tmp.p = nullptr;
-		return (*this);
-	}
 
-	bool operator==(const Object& other) const{
-		return (i == other.i);
+		std_test.run();
+		ft_test.run();
+		std_test_type::printResult(std_test, ft_test);
+		std_test.reset();
+		ft_test.reset();
 	}
+	else
+		exit(1);
+}
 
-	bool operator!=(const Object& other) const{
-		return !(operator==(other));
-	}
-};
+
 
 void vectorTests(){
+	TestOnType::printVectorHeader();
+	evaluateResult(VEC_COUNTER, "vector_general_test1");
+	evaluateResult(VEC_COUNTER + 1, "vector_general_test2");
+	evaluateResult(VEC_COUNTER + 2, "vector_general_test3");
+	evaluateResult(VEC_COUNTER + 3, "vector_general_test4");
 
-	{
-		typedef track_allocator<int> allocator;
-		TestOn<std::vector<int, allocator> > std_test;
-		TestOn<_vector<int, allocator> > ft_test;
+	evaluateResult(VEC_COUNTER + 4, "int_vector_time_general");
+}
 
-		std_test.name = "Construct_Int";
-		std_test.testFunction = &TestOn<std::vector<int, allocator> >::construct;
-		ft_test.testFunction = &TestOn<_vector<int, allocator> >::construct;
-		evaluateResult(std_test, ft_test);
-	}
+void stackTests(){
+	TestOnType::printStackHeader();
+	evaluateResult(STA_COUNTER, "stack_general_test1");
+	evaluateResult(STA_COUNTER + 1, "stack_general_test2");
+}
 
-	{
-		typedef Object type;
-		typedef track_allocator<type> allocator;
-		TestOn<std::vector<type, allocator> > std_test;
-		TestOn<_vector<type, allocator> > ft_test;
+void setTests(){
+	TestOnType::printSetHeader();
+	evaluateResult(SET_COUNTER, "set_general_test1");
+	evaluateResult(SET_COUNTER + 1, "set_general_test2");
+	evaluateResult(SET_COUNTER + 2, "set_general_test3");
+	evaluateResult(SET_COUNTER + 3, "set_general_test4");
+	evaluateResult(SET_COUNTER + 4, "set_time_general");
+}
 
-		std_test.name = "Construct_Object";
-		std_test.testFunction = &TestOn<std::vector<type, allocator> >::construct;
-		ft_test.testFunction = &TestOn<_vector<type, allocator> >::construct;
-		evaluateResult(std_test, ft_test);
-	}
+void mapTests(){
+	TestOnType::printMapHeader();
+	evaluateMapResult<int, std::string>(MAP_COUNTER, "map_general");
+}
+
+void mainTests(){
+	TestOnType::printInfo();
+	FoxerGlobal::init_random_int(RANDOM_SIZE, RANDOM_SEED);
+	FoxerGlobal::init_random_string(RANDOM_SIZE, RANDOM_SEED);
+	//vectorTests();
+	//stackTests();
+	setTests();
+	//mapTests();
 }
 
 int main(){
-
-	TestOnType::printInfo();
-	TestOnType::printVectorHeader();
-	vectorTests();
-
-
-
+	mainTests();
 	return (0);
 }
