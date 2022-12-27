@@ -46,6 +46,10 @@ void evaluateResult(int test_nb, const std::string& name)
 				ft_test.testFunction = &ft_test_type::int_vector_general_test4;
 				break;
 			case (VEC_COUNTER + 4):
+				std_test.testFunction = &std_test_type::int_vector_general_test5;
+				ft_test.testFunction = &ft_test_type::int_vector_general_test5;
+				break;
+			case (VEC_COUNTER + 5):
 				std_test.testFunction = &std_test_type::int_vector_time_general;
 				ft_test.testFunction = &ft_test_type::int_vector_time_general;
 				break;
@@ -188,8 +192,9 @@ void vectorTests(){
 	evaluateResult(VEC_COUNTER + 1, "vector_general_test2");
 	evaluateResult(VEC_COUNTER + 2, "vector_general_test3");
 	evaluateResult(VEC_COUNTER + 3, "vector_general_test4");
+	evaluateResult(VEC_COUNTER + 4, "vector_general_test5");
 
-	evaluateResult(VEC_COUNTER + 4, "int_vector_time_general");
+	evaluateResult(VEC_COUNTER + 5, "int_vector_time_general");
 }
 
 void stackTests(){
@@ -209,10 +214,10 @@ void setTests(){
 
 void mapTests(){
 	TestOnType::printMapHeader();
-	//evaluateMapResult<int, int>(MAP_COUNTER, "map_general_test1");
-	//evaluateMapResult<int, int>(MAP_COUNTER + 1, "map_general_test2");
-	//evaluateMapResult<int, int>(MAP_COUNTER + 2, "map_general_test3");
-	//evaluateMapResult<int, int>(MAP_COUNTER + 3, "map_general_test4");
+	evaluateMapResult<int, int>(MAP_COUNTER, "map_general_test1");
+	evaluateMapResult<int, int>(MAP_COUNTER + 1, "map_general_test2");
+	evaluateMapResult<int, int>(MAP_COUNTER + 2, "map_general_test3");
+	evaluateMapResult<int, int>(MAP_COUNTER + 3, "map_general_test4");
 	evaluateMapResult<int, int>(MAP_COUNTER + 4, "map_time_general");
 }
 
@@ -220,40 +225,13 @@ void mainTests(){
 	TestOnType::printInfo();
 	FoxerGlobal::init_random_int(RANDOM_SIZE, RANDOM_SEED);
 	FoxerGlobal::init_random_string(RANDOM_SIZE, RANDOM_SEED);
-	//vectorTests();
-	//stackTests();
-	//setTests();
+	vectorTests();
+	stackTests();
+	setTests();
 	mapTests();
 }
 
-
-#include <utility>
-#include <iostream>
-#include <iterator>
-
-
-struct T : std::pair<int, int> {
-	using std::pair<int, int>::pair;
-};
-
-std::istream& operator>>(std::istream& stream, T& in) {
-	return stream >> in.first >> in.second;
-}
-
 int main(){
-	std::stringstream stream;
-
-	// Write some pairs to the stream
-	stream << "1 2";
-	std::istringstream str(stream.str());
-	std::istream_iterator<T> iit(str), end;
-	std::istream_iterator<T> eos;
-
-
-	ft::map<int, int> map;
-	map.insert(iit, end);
-	std::cout << map.size() << std::endl;
-
-	//mainTests();
+	mainTests();
 	return (0);
 }

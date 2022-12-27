@@ -29,7 +29,7 @@ std::istream& operator>>(std::istream& is, std::pair<T1, T2>& p)
 	return is;
 }
 
-//TODO: capacity
+
 template <class containerType>
 class TestOn{
 #pragma region Head
@@ -141,7 +141,6 @@ public:
 /*****************************************************************/
 #pragma region VectorTest
 public:
-//TODO test max_size
 	void int_vector_general_test1(){
 		//test all type of constructor
 		//all iterators
@@ -354,6 +353,36 @@ public:
 			c.push_back(1);
 		}catch (...){
 			c.push_back(0);
+		}
+	}
+
+	void int_vector_general_test5(){
+		//max_size
+
+		//typedef std::vector<int> type;
+		typedef container type;
+
+		bool is_std = std::is_same<type, std::vector<int, typename type::allocator_type> >::value;
+		if (is_std){
+			c.push_back(int(true));
+			c.push_back(int(true));
+			c.push_back(int(true));
+			c.push_back(int(true));
+		}else{
+			std::vector<int> std_a;
+			std::vector<char> std_b;
+			std::vector<Object> std_c;
+			std::vector<double> std_d;
+
+			ft::vector<int> ft_a;
+			ft::vector<char> ft_b;
+			ft::vector<Object> ft_c;
+			ft::vector<double> ft_d;
+
+			c.push_back(int(std_a.max_size() == ft_a.max_size()));
+			c.push_back(int(std_b.max_size() == ft_b.max_size()));
+			c.push_back(int(std_c.max_size() == ft_c.max_size()));
+			c.push_back(int(std_d.max_size() == ft_d.max_size()));
 		}
 	}
 
@@ -688,7 +717,7 @@ public:
 
 #pragma region SetTest
 
-//TODO custom key_compare
+
 public:
 	void set_general_test1(){
 		//constructors, all iterators, destructor, copy constructor and Assignment
@@ -1161,7 +1190,7 @@ public:
 
 #pragma region MapTest
 
-//TODO custom key_compare
+
 public:
 	void map_general_test1(){
 		//constructors, all iterators, destructor, copy constructor and Assignment
@@ -1518,7 +1547,7 @@ public:
 		//typedef std::map<int, int> type;
 		typedef typename type::value_type map_value_type;
 
-		bool is_std = std::is_same<type , std::set<typename type::value_type, typename  type::key_compare, typename type::allocator_type> >::value;
+		bool is_std = std::is_same<type , std::map<int, int, typename type::key_compare , typename type::allocator_type> >::value;
 
 		if (is_std){
 			typedef std::map<Object, int, std::less<Object> > obj_map;
@@ -1543,7 +1572,7 @@ public:
 		//typedef container type;
 		typedef typename type::value_type map_value_type;
 
-		bool is_std = std::is_same<type , std::set<typename type::value_type, typename  type::key_compare, typename type::allocator_type> >::value;
+		bool is_std = std::is_same<type , std::map<int, int, typename type::key_compare , typename type::allocator_type> >::value;
 
 		if (is_std){
 			typedef std::map<Object, int, std::less<Object> > obj_map;
@@ -1602,29 +1631,6 @@ public:
 		}
 	}
 
-	void map_time_from_input_iter(){
-		//typedef container type;
-		//typedef typename type::value_type map_value_type;
-		typedef std::map<int, int> type;
-
-		std::stringstream stream;
-
-		// Write some pairs to the stream
-		stream << "1 2";
-
-		// Read the pairs from the stream
-		std::istringstream str(stream.str());
-		//std::istream_iterator<std::pair<int, int> > it(str), end;
-
-		/*type map(it, end);
-		c.insert(c.begin(), map.begin(), map.end());
-		map.clear();
-
-		it = str2;
-		map.insert(it, end);
-		c.insert(c.begin(), map.begin(), map.end());*/
-	}
-
 	/////////////////////////
 
 	void map_time_general(){
@@ -1632,13 +1638,12 @@ public:
 
 		//typedef std::set<int> type;
 
-		bool is_std = std::is_same<type , std::set<typename type::value_type, typename  type::key_compare, typename type::allocator_type> >::value;
+		bool is_std = std::is_same<type , std::map<int, int, typename type::key_compare , typename type::allocator_type> >::value;
 		run_test_speed(is_std, &TestOn<container>::map_time_insert, "map_time_insert");
 		run_test_speed(is_std, &TestOn<container>::map_time_erase, "map_time_erase");
 		run_test_speed(is_std, &TestOn<container>::map_time_obj_insert, "map_time_obj_insert");
 		run_test_speed(is_std, &TestOn<container>::map_time_obj_erase, "map_time_obj_erase");
 		run_test_speed(is_std, &TestOn<container>::map_time_iter, "map_time_iter");
-		run_test_speed(is_std, &TestOn<container>::map_time_from_input_iter, "map_time_from_input_iter");
 
 		std::vector<std::pair<time_t, std::string> >::size_type time_size = FoxerGlobal::save_time.size();
 		int i = 0;
@@ -1669,7 +1674,6 @@ public:
 		return (msecs_time);
 	}
 
-	//TODO stack max_size
 	template <typename container1, typename container2>
 	static bool compareContainers(container1& c1, container2& c2)
 	{

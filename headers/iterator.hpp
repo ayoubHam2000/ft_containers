@@ -43,7 +43,6 @@ namespace ft {
 #pragma endregion
 
 #pragma region reverse iterator
-	//TODO: documentation
 	/*****************************************************************/
 	// reverse_iterator
 	/*****************************************************************/
@@ -236,7 +235,6 @@ namespace ft {
 
 #pragma region vector_iterator
 
-	//TODO: documentation
 	/*****************************************************************/
 	// vector_iter
 	/*****************************************************************/
