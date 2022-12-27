@@ -226,7 +226,34 @@ void mainTests(){
 	mapTests();
 }
 
+
+#include <utility>
+#include <iostream>
+#include <iterator>
+
+
+struct T : std::pair<int, int> {
+	using std::pair<int, int>::pair;
+};
+
+std::istream& operator>>(std::istream& stream, T& in) {
+	return stream >> in.first >> in.second;
+}
+
 int main(){
-	mainTests();
+	std::stringstream stream;
+
+	// Write some pairs to the stream
+	stream << "1 2";
+	std::istringstream str(stream.str());
+	std::istream_iterator<T> iit(str), end;
+	std::istream_iterator<T> eos;
+
+
+	ft::map<int, int> map;
+	map.insert(iit, end);
+	std::cout << map.size() << std::endl;
+
+	//mainTests();
 	return (0);
 }

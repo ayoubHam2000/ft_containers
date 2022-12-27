@@ -1614,7 +1614,7 @@ public:
 
 		// Read the pairs from the stream
 		std::istringstream str(stream.str());
-		std::istream_iterator<std::pair<int, int> > it(str), end;
+		//std::istream_iterator<std::pair<int, int> > it(str), end;
 
 		/*type map(it, end);
 		c.insert(c.begin(), map.begin(), map.end());
