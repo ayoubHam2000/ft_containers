@@ -10,7 +10,6 @@ include_directories(.)
 
 
 add_executable(ft_containers
-        headers/vector.hpp
-        headers/test.hpp
-        headers/iterator.hpp
-        main.cpp headers/utils.hpp headers/algorithm.hpp headers/track_alloc.hpp headers/stack.hpp headers/map.hpp headers/Tree.hpp main.h headers/queue.hpp headers/type_traits.hpp headers/map_prelude.h headers/set.hpp headers/ft_containers_foxer_test/config.h headers/ft_containers_foxer_test/base/base.h headers/ft_containers_foxer_test/foxer.h headers/ft_containers_foxer_test/base/truck_allocator.h headers/ft_containers_foxer_test/base/memory_tracker.cpp headers/ft_containers_foxer_test/base/memory_tracker.h headers/ft_containers_foxer_test/base/statistic_tracker.cpp headers/ft_containers_foxer_test/base/statistic_tracker.h headers/ft_containers_foxer_test/base/utils.cpp headers/ft_containers_foxer_test/base/utils.h headers/ft_containers_foxer_test/base/TestOn.hpp headers/ft_containers_foxer_test/base/common.h headers/ft_containers_foxer_test/base/foxer_global.cpp headers/ft_containers_foxer_test/base/FoxerGlobal.h test.cpp)
+        headers/containers/vector.hpp
+        headers/utils/iterator.hpp
+        main.cpp headers/utils/utils.hpp headers/utils/algorithm.hpp headers/containers/stack.hpp headers/containers/map.hpp headers/utils/Tree.hpp headers/utils/queue.hpp headers/utils/type_traits.hpp headers/containers/set.hpp headers/ft_containers_fox_test/config.h headers/ft_containers_fox_test/fox.h headers/ft_containers_fox_test/base/truck_allocator.h headers/ft_containers_fox_test/base/memory_tracker.cpp headers/ft_containers_fox_test/base/memory_tracker.h headers/ft_containers_fox_test/base/statistic_tracker.cpp headers/ft_containers_fox_test/base/statistic_tracker.h headers/ft_containers_fox_test/base/TestOn.hpp headers/ft_containers_fox_test/base/common.h headers/ft_containers_fox_test/base/foxer_global.cpp headers/ft_containers_fox_test/base/FoxerGlobal.h headers/ft_containers_fox_test/MainTest.cpp)

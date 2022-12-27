@@ -1,5 +1,8 @@
 FILES = \
-	src/Vector.cpp \
+	headers/ft_containers_fox_test/base/foxer_global.cpp \
+	headers/ft_containers_fox_test/base/memory_tracker.cpp \
+	headers/ft_containers_fox_test/base/statistic_tracker.cpp \
+	headers/ft_containers_fox_test/MainTest.cpp \
 	main.cpp
 
 OBJ_DIR = _OUT/
@@ -8,7 +11,7 @@ OBJ = $(addprefix $(OBJ_DIR), $(FILES:.cpp=.o))
 DEPS = $(OBJ:.o=.d)
 
 DEPFLAGS = -MMD -MF $(@:.o=.d)
-CFLAGS =  -I ./headers -std=c++98 -g
+CFLAGS =  -Wall -Wextra -Werror -I . -std=c++98
 #-Wall -Wextra -Werror
 NAME = ft_containers
 
