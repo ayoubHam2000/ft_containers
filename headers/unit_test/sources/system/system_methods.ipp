@@ -3,7 +3,7 @@
 
 time_t timer() {
 	struct timeval start = {};
-	gettimeofday(&start, nullptr);
+	gettimeofday(&start, NULL);
 	time_t msecs_time = (start.tv_sec * 1000) + (start.tv_usec / 1000);
 	return msecs_time;
 }

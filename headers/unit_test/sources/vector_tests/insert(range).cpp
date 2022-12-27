@@ -5,14 +5,14 @@ class B {
 public:
     char *l;
     int i;
-    B():l(nullptr), i(1) {};
+    B():l(NULL), i(1) {};
     B(const int &ex) {
         this->i = ex;
         this->l = new char('a');
     };
     virtual ~B() {
         delete this->l;
-        this->l = nullptr;
+        this->l = NULL;
     };
 };
 
@@ -26,7 +26,7 @@ public:
     }
     ~A() {
         delete this->l;
-        this->l = nullptr;
+        this->l = NULL;
     };
 };
 

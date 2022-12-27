@@ -79,9 +79,9 @@ public:
 		int i;
 		int *p;
 
-		Object(): i(), p(nullptr){}
-		explicit Object(int i): i(i), p(nullptr){}
-		Object(const Object& other): i(other.i), p(nullptr){
+		Object(): i(), p(NULL){}
+		explicit Object(int i): i(i), p(NULL){}
+		Object(const Object& other): i(other.i), p(NULL){
 			if (other.p){
 				p = new int();
 				*p = *other.p;
@@ -95,7 +95,7 @@ public:
 			delete p;
 			i = other.i;
 			p = other.p;
-			tmp.p = nullptr;
+			tmp.p = NULL;
 			return (*this);
 		}
 
@@ -395,7 +395,10 @@ public:
 		(this->*function)();
 		time = get_time() - time;
 		FoxerGlobal::save_time.push_back(std::make_pair(time, name));
-		std::cout << "*";
+		if (is_std)
+			std::cout << RED << "*" << RESET;
+		else
+			std::cout << BLUE << "*" << RESET;
 		std::flush(std::cout);
 	}
 
@@ -406,11 +409,11 @@ public:
 		size_t size = SIZE_TEST;
 		type vector;
 
-		for (int i = 0; i < size; i++){
+		for (size_t i = 0; i < size; i++){
 			vector.insert(vector.begin(), i);
 			vector.insert(vector.end(), i);
 		}
-		for (int i = 0; i < size; i++){
+		for (size_t i = 0; i < size; i++){
 			vector.insert(vector.begin() + 3, i);
 		}
 		c.insert(c.begin(), vector.begin(), vector.end());
@@ -423,7 +426,7 @@ public:
 		size_t size = SIZE_TEST;
 		type vector;
 
-		for (int i = 0; i < size; i++){
+		for (size_t i = 0; i < size; i++){
 			vector.push_back(i);
 		}
 	}
@@ -432,7 +435,6 @@ public:
 		//typedef std::vector<int> type;
 		typedef container type;
 
-		size_t size = SIZE_TEST;
 		type vector;
 
 		for (int i = 0; i < 10; i++)
@@ -453,11 +455,11 @@ public:
 			typedef std::vector<Object, obj_allocator_type> obj_vector;
 			size_t size = SIZE_TEST;
 			obj_vector vector;
-			for (int i = 0; i < size; i++){
+			for (size_t i = 0; i < size; i++){
 				vector.insert(vector.begin(), Object());
 				vector.insert(vector.end(), Object());
 			}
-			for (int i = 0; i < size; i++){
+			for (size_t i = 0; i < size; i++){
 				vector.insert(vector.begin() + 3, Object());
 			}
 
@@ -466,11 +468,11 @@ public:
 
 			size_t size = SIZE_TEST;
 			obj_vector vector;
-			for (int i = 0; i < size; i++){
+			for (size_t i = 0; i < size; i++){
 				vector.insert(vector.begin(), Object());
 				vector.insert(vector.end(), Object());
 			}
-			for (int i = 0; i < size; i++){
+			for (size_t i = 0; i < size; i++){
 				vector.insert(vector.begin() + 3, Object());
 			}
 		}
@@ -486,11 +488,10 @@ public:
 		if (is_std){
 			typedef std::vector<Object, obj_allocator_type> obj_vector;
 
-			size_t size = SIZE_TEST;
-			type vector;
+			obj_vector vector;
 
 			for (int i = 0; i < 10; i++)
-				vector.insert(vector.begin(), FoxerGlobal::random_values_int.begin(), FoxerGlobal::random_values_int.end());
+				vector.push_back(Object(i));
 			time = get_time();
 			while (!vector.empty()){
 				vector.erase(vector.begin());
@@ -498,13 +499,12 @@ public:
 
 
 		}else{
-			typedef ft::vector<Object, obj_allocator_type> obj_vector;
+			typedef std::vector<Object, obj_allocator_type> obj_vector;
 
-			size_t size = SIZE_TEST;
-			type vector;
+			obj_vector vector;
 
 			for (int i = 0; i < 10; i++)
-				vector.insert(vector.begin(), FoxerGlobal::random_values_int.begin(), FoxerGlobal::random_values_int.end());
+				vector.push_back(Object(i));
 			time = get_time();
 			while (!vector.empty()){
 				vector.erase(vector.begin());
@@ -520,12 +520,12 @@ public:
 		size_t size = SIZE_TEST;
 		type vector;
 
-		for (int i = 0; i < size; i++){
+		for (size_t i = 0; i < size; i++){
 			vector.push_back(i);
 		}
 
 		type::iterator it = vector.begin();
-		for (int i = 0; i < 1000000; i++){
+		for (size_t i = 0; i < 1000000; i++){
 			(*vector.begin()) = 1;
 			(*(vector.end() - 1)) = 8;
 			it++;
@@ -545,7 +545,7 @@ public:
 
 		size_t size = SIZE_TEST;
 		std::stringstream stream;
-		for (int i = 0; i < size; i++) {
+		for (size_t i = 0; i < size; i++) {
 			if (i < size - 1) {
 				stream << i << " ";
 			}
@@ -569,8 +569,9 @@ public:
 	void print_time_test(){
 		std::cout << std::endl;
 		std::vector<std::pair<time_t, std::string> >::size_type time_size = FoxerGlobal::save_time.size();
+		std::vector<std::pair<time_t, std::string> >::size_type i;
 		time_size /= 2;
-		for (int i = 0; i < time_size; i++){
+		for (i = 0; i < time_size; i++){
 			printElement(FoxerGlobal::save_time[i].second + "_std-ft", WHITE, 55);
 			time_t std_time = FoxerGlobal::save_time[i].first;
 			time_t ft_time = FoxerGlobal::save_time[i + time_size].first;
@@ -597,7 +598,7 @@ public:
 		run_test_speed(is_std, &TestOn<container>::vector_time_from_input_iter, "vector_time_from_input_iter");
 
 		std::vector<std::pair<time_t, std::string> >::size_type time_size = FoxerGlobal::save_time.size();
-		int i = 0;
+		std::vector<std::pair<time_t, std::string> >::size_type i = 0;
 		if (!is_std){
 			i = time_size / 2;
 			print_time_test();
@@ -934,8 +935,8 @@ public:
 
 		//7
 		typename type::key_compare cmp2 = a.value_comp();
-		c.push_back(int(cmp(10, 20)));
-		c.push_back(int(cmp(20, 10)));
+		c.push_back(int(cmp2(10, 20)));
+		c.push_back(int(cmp2(20, 10)));
 
 	}
 
@@ -1019,7 +1020,7 @@ public:
 		size_t size = TREE_SIZE_TEST;
 		type set;
 
-		for (int i = 0; i < size; i++){
+		for (size_t i = 0; i < size; i++){
 			set.insert(i);
 			set.insert(set.begin(), i);
 			set.insert(set.end(), i);
@@ -1031,7 +1032,6 @@ public:
 		//typedef std::set<int> type;
 		typedef container type;
 
-		size_t size = TREE_SIZE_TEST;
 		type set;
 
 		for (int i = 0; i < 100; i++)
@@ -1054,14 +1054,14 @@ public:
 			typedef std::set<Object, std::less<Object>, obj_allocator_type> obj_set;
 			size_t size = TREE_SIZE_TEST * 2;
 			obj_set set;
-			for (int i = 0; i < size; i++){
+			for (size_t i = 0; i < size; i++){
 				set.insert(Object(i));
 			}
 		}else{
 			typedef ft::set<Object, std::less<Object>, obj_allocator_type> obj_set;
 			size_t size = TREE_SIZE_TEST * 2;
 			obj_set set;
-			for (int i = 0; i < size; i++){
+			for (size_t i = 0; i < size; i++){
 				set.insert(Object(i));
 			}
 		}
@@ -1081,7 +1081,7 @@ public:
 			size_t size = TREE_SIZE_TEST;
 			obj_set set;
 
-			for (int i = 0; i < size; i++)
+			for (size_t i = 0; i < size; i++)
 				set.insert(Object(i));
 			time = get_time();
 			while (!set.empty()){
@@ -1095,7 +1095,7 @@ public:
 			size_t size = TREE_SIZE_TEST;
 			obj_set set;
 
-			for (int i = 0; i < size; i++)
+			for (size_t i = 0; i < size; i++)
 				set.insert(Object(i));
 			time = get_time();
 			while (!set.empty()){
@@ -1112,12 +1112,12 @@ public:
 		size_t size = TREE_SIZE_TEST;
 		type set;
 
-		for (int i = 0; i < size; i++){
+		for (size_t i = 0; i < size; i++){
 			set.insert(i);
 		}
 
 		typename type::iterator it = set.begin();
-		for (int i = 0; i < 1000000; i++){
+		for (size_t i = 0; i < 1000000; i++){
 			it++;
 			--it;
 			++it;
@@ -1135,7 +1135,7 @@ public:
 
 		size_t size = TREE_SIZE_TEST;
 		std::stringstream stream;
-		for (int i = 0; i < size; i++) {
+		for (size_t i = 0; i < size; i++) {
 			if (i < size - 1) {
 				stream << i << " ";
 			}
@@ -1172,7 +1172,8 @@ public:
 		run_test_speed(is_std, &TestOn<container>::set_time_from_input_iter, "set_time_from_input_iter");
 
 		std::vector<std::pair<time_t, std::string> >::size_type time_size = FoxerGlobal::save_time.size();
-		int i = 0;
+		std::vector<std::pair<time_t, std::string> >::size_type i;
+		i = 0;
 		if (!is_std){
 			i = time_size / 2;
 			print_time_test();
@@ -1345,7 +1346,7 @@ public:
 		//typedef std::map<int, int, std::less<int> > type;
 		typedef container type;
 		typedef typename type::iterator iterator;
-		typedef typename type::const_iterator const_iterator;
+		//typedef typename type::const_iterator const_iterator;
 		typedef typename type::value_type map_value_type;
 
 		std::vector<map_value_type> arr;
@@ -1420,8 +1421,8 @@ public:
 
 		//7
 		typename type::value_compare cmp2 = a.value_comp();
-		c.push_back(map_value_type(int(cmp(10, 20)), 77));
-		c.push_back(map_value_type(int(cmp(20, 10)), 77));
+		c.push_back(map_value_type(int(cmp2(map_value_type(20, 77), map_value_type(10, 77))), 77));
+		c.push_back(map_value_type(int(cmp2(map_value_type(10, 77), map_value_type(20, 77))), 77));
 
 	}
 
@@ -1431,7 +1432,7 @@ public:
 		//typedef std::map<int, int, std::less<int> > type;
 		typedef container type;
 		typedef typename type::iterator iterator;
-		typedef typename type::const_iterator const_iterator;
+		//typedef typename type::const_iterator const_iterator;
 		typedef typename type::value_type map_value_type;
 
 		std::vector<map_value_type> arr;
@@ -1511,7 +1512,7 @@ public:
 		size_t size = TREE_SIZE_TEST;
 		type map;
 
-		for (int i = 0; i < size; i++){
+		for (size_t i = 0; i < size; i++){
 			map.insert(map_value_type(i, 77));
 			map.insert(map.begin(), map_value_type(i, 77));
 			map.insert(map.end(), map_value_type(i, 77));
@@ -1529,7 +1530,7 @@ public:
 			arr.push_back(map_value_type(FoxerGlobal::random_values_int[i], FoxerGlobal::random_values_int[i]));
 		}
 
-		size_t size = TREE_SIZE_TEST;
+
 		type map;
 
 		for (int i = 0; i < 100; i++)
@@ -1545,7 +1546,7 @@ public:
 	void map_time_obj_insert(){
 		typedef container type;
 		//typedef std::map<int, int> type;
-		typedef typename type::value_type map_value_type;
+		//typedef typename type::value_type map_value_type;
 
 		bool is_std = std::is_same<type , std::map<int, int, typename type::key_compare , typename type::allocator_type> >::value;
 
@@ -1553,14 +1554,14 @@ public:
 			typedef std::map<Object, int, std::less<Object> > obj_map;
 			size_t size = TREE_SIZE_TEST * 2;
 			obj_map map;
-			for (int i = 0; i < size; i++){
+			for (size_t i = 0; i < size; i++){
 				map.insert(std::make_pair(Object(), 77));
 			}
 		}else{
 			typedef ft::map<Object, int, std::less<Object> > obj_map;
 			size_t size = TREE_SIZE_TEST * 2;
 			obj_map map;
-			for (int i = 0; i < size; i++){
+			for (size_t i = 0; i < size; i++){
 				map.insert(ft::make_pair(Object(), 77));
 			}
 		}
@@ -1570,7 +1571,7 @@ public:
 	void map_time_obj_erase(){
 		typedef std::map<int, int> type;
 		//typedef container type;
-		typedef typename type::value_type map_value_type;
+		//typedef typename type::value_type map_value_type;
 
 		bool is_std = std::is_same<type , std::map<int, int, typename type::key_compare , typename type::allocator_type> >::value;
 
@@ -1580,7 +1581,7 @@ public:
 			size_t size = TREE_SIZE_TEST;
 			obj_map map;
 
-			for (int i = 0; i < size; i++)
+			for (size_t i = 0; i < size; i++)
 				map.insert(std::make_pair(Object(i), 10));
 			time = get_time();
 			while (!map.empty()){
@@ -1594,7 +1595,7 @@ public:
 			size_t size = TREE_SIZE_TEST;
 			obj_map map;
 
-			for (int i = 0; i < size; i++)
+			for (size_t i = 0; i < size; i++)
 				map.insert(ft::make_pair(Object(i), 10));
 			time = get_time();
 			while (!map.empty()){
@@ -1614,7 +1615,7 @@ public:
 		size_t size = TREE_SIZE_TEST;
 		type map;
 
-		for (int i = 0; i < size; i++){
+		for (size_t i = 0; i < size; i++){
 			map.insert(map_value_type(i, 77));
 		}
 
@@ -1646,7 +1647,7 @@ public:
 		run_test_speed(is_std, &TestOn<container>::map_time_iter, "map_time_iter");
 
 		std::vector<std::pair<time_t, std::string> >::size_type time_size = FoxerGlobal::save_time.size();
-		int i = 0;
+		std::vector<std::pair<time_t, std::string> >::size_type i = 0;
 		if (!is_std){
 			i = time_size / 2;
 			print_time_test();

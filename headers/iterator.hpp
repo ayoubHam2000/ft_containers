@@ -264,7 +264,7 @@ namespace ft {
 		pointer ptr;
 
 	public:
-		vector_iter() : ptr(nullptr) {
+		vector_iter() : ptr(NULL) {
 		}
 
 		vector_iter(pointer x) : ptr(x) {

@@ -11,7 +11,6 @@
 namespace ft{
 
 
-
 	/**
 	 * @name distance_iterator
 	 * @brief calculate the distance between two iterators
@@ -54,9 +53,6 @@ namespace ft{
 
 
 
-
-
-
 	template <class T>
 	std::string to_string(T n)
 	{
@@ -92,7 +88,6 @@ namespace ft{
 
 		}
 
-		//TODO Why it is a template
 		template <class U1, class U2>
 		pair(const pair<U1, U2> &p) : first(p.first), second(p.second) {
 
@@ -149,7 +144,6 @@ namespace ft{
 		return (!(y < x));
 	}
 
-	//TODO __is_swappable
 	template <class _T1, class _T2>
 	void swap(pair<_T1, _T2> &x, pair<_T1, _T2> &y) _NOEXCEPT
 	{

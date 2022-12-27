@@ -9,7 +9,6 @@
 #include "utils.hpp"
 #include "algorithm.hpp"
 
-//TODO Length error max_length
 namespace ft{
 
 	template <class T, class Allocator = std::allocator<T> >
@@ -56,9 +55,9 @@ namespace ft{
 		 * */
 		explicit vector(const allocator_type &alloc = allocator_type())
 		:
-				_first(nullptr),
-				_last(nullptr),
-				_last_max(nullptr),
+				_first(NULL),
+				_last(NULL),
+				_last_max(NULL),
 				_alloc(alloc)
 		{}
 
@@ -82,9 +81,9 @@ namespace ft{
 				const allocator_type& alloc = allocator_type()
 						)
 		:
-				_first(nullptr),
-				_last(nullptr),
-				_last_max(nullptr),
+				_first(NULL),
+				_last(NULL),
+				_last_max(NULL),
 				_alloc(alloc)
 		{
 			insert(begin(), n, val);
@@ -113,9 +112,9 @@ namespace ft{
 				const allocator_type& alloc = allocator_type()
 				)
 	   :
-			_first(nullptr),
-			_last(nullptr),
-			_last_max(nullptr),
+			_first(NULL),
+			_last(NULL),
+			_last_max(NULL),
 			_alloc(alloc)
 		{
 			insert(begin(), first, last);
@@ -128,9 +127,9 @@ namespace ft{
 		 */
 		vector (const vector& x)
 		:
-				_first(nullptr),
-				_last(nullptr),
-				_last_max(nullptr),
+				_first(NULL),
+				_last(NULL),
+				_last_max(NULL),
 				_alloc(x._alloc)
 		{
 			insert(this->begin(), x.begin(), x.end());

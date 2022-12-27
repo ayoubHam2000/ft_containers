@@ -7,7 +7,8 @@
 
 #include <iostream>
 
-
+//TODO remove it
+//TODO hide names in namespace
 #if defined(__linux__)
 #include <type_traits>
 #include <cstddef>
@@ -102,26 +103,36 @@ namespace ft{
 		static const bool value = true;
 	};
 
+	template <class _Tp> struct  remove_volatile               {typedef _Tp type;};
+	template <class _Tp> struct  remove_volatile<volatile _Tp> {typedef _Tp type;};
+
+	template <class Tp> struct  remove_const           {typedef Tp type;};
+	template <class Tp> struct  remove_const<const Tp> {typedef Tp type;};
+
+	template <class Tp> struct  remove_cv
+	{typedef typename remove_volatile<typename remove_const<Tp>::type>::type type;};
+
 	/**
-	 * TODO remove reference and const
 	 * @name is_integral
 	 * @brief has a member value = true if @tparam T is integral
 	 */
-	template <class T> struct is_integral : public false_type {};
-	template <> struct is_integral<bool> : public true_type {};
-	template <> struct is_integral<char> : public true_type {};
-	template <> struct is_integral<signed char > : public true_type {};
-	template <> struct is_integral<unsigned char> : public true_type {};
-	template <> struct is_integral<wchar_t> : public true_type {};
-	template <> struct is_integral<short> : public true_type {};
-	template <> struct is_integral<unsigned short> : public true_type {};
-	template <> struct is_integral<int> : public true_type {};
-	template <> struct is_integral<unsigned int> : public true_type {};
-	template <> struct is_integral<long> : public true_type {};
-	template <> struct is_integral<unsigned long> : public true_type {};
-	template <> struct is_integral<long long> : public true_type {};
-	template <> struct is_integral<unsigned long long> : public true_type {};
 
+	template <class T> struct _w_is_integral : public false_type {};
+	template <> struct _w_is_integral<bool> : public true_type {};
+	template <> struct _w_is_integral<char> : public true_type {};
+	template <> struct _w_is_integral<signed char > : public true_type {};
+	template <> struct _w_is_integral<unsigned char> : public true_type {};
+	template <> struct _w_is_integral<wchar_t> : public true_type {};
+	template <> struct _w_is_integral<short> : public true_type {};
+	template <> struct _w_is_integral<unsigned short> : public true_type {};
+	template <> struct _w_is_integral<int> : public true_type {};
+	template <> struct _w_is_integral<unsigned int> : public true_type {};
+	template <> struct _w_is_integral<long> : public true_type {};
+	template <> struct _w_is_integral<unsigned long> : public true_type {};
+	template <> struct _w_is_integral<long long> : public true_type {};
+	template <> struct _w_is_integral<unsigned long long> : public true_type {};
+
+	template <class T> struct is_integral : public _w_is_integral<typename remove_cv<T>::type >{};
 
 	template<typename T>
 	struct _remove_reference {
@@ -171,6 +182,7 @@ namespace ft{
 
 	template <class _ValueType, class _Type, class _To>
 	struct __is_valid_iterator<_ValueType, _Type, _To, false> : public false_type {};
+
 
 	//
 	template <class _ValueType, class _Type>
