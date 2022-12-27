@@ -14,6 +14,7 @@
 #include <string>
 #include <limits>
 #include <iomanip>
+#include <iterator>
 #define _NOEXCEPT throw()
 #endif
 
@@ -164,8 +165,8 @@ namespace ft{
 	template <class _ValueType, class _Type, class _To, bool>
 	struct __is_valid_iterator{
 		static const bool value =
-				std::is_convertible<typename iterator_traits<_Type>::iterator_category, _To>::value &&
-				std::is_constructible<_ValueType, typename iterator_traits<_Type>::reference>::value;
+				std::is_convertible<typename iterator_traits<_Type>::iterator_category, _To>::value
+				&& std::is_constructible<_ValueType, typename iterator_traits<_Type>::reference>::value;
 	};
 
 	template <class _ValueType, class _Type, class _To>
