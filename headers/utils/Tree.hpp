@@ -153,7 +153,7 @@ public:
 	void 	printTree(std::ostream &os, size_t tree_height){
 		size_t level_item = tree_height;
 		size_t buffer_size = 1;
-		size_t item_len = 4;
+		size_t item_len = 2;
 		while (level_item--){
 			buffer_size *= 2;
 		}
