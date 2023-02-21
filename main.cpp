@@ -214,27 +214,104 @@ void	parse(Tree &tree, std::string command, Tree::nodePointer node){
 				parse(tree, std::string(s2), n2);
 			} else if (std::strchr(command.c_str(), '(')){
 				std::string newCommand = remove_parenthesis(command.c_str());
+				node->data = newCommand;
 				parse(tree, newCommand, node);
 			}
 		}
 	}
+}
+
+#include <unistd.h>
+#include <string.h>
+#include <sstream>
+
+void exec(Tree::nodePointer node, int in, int out);
+
+char** getCommandArgs(const std::string &command){
+	std::vector<std::string> vector;
+	std::istringstream iss(command);
+	std::string token;
+	while (std::getline(iss, token, ' ')){
+		vector.push_back(token);
+	}
+	char **res = new char*[vector.size() + 1];
+	int i = 0;
+	for (std::vector<std::string>::iterator iter = vector.begin(); iter != vector.end(); ++iter){
+		if (!iter->empty()){
+			res[i] = new char[iter->size() + 1];
+			std::strcpy(res[i], iter->c_str());
+			res[i][iter->size()] = 0;
+			i++;
+		}
+	}
+	res[i] = NULL;
+	return (res);
+}
+
+void	ft_dup2(int f1, int f2)
+{
+	if (f1 == f2)
+		return ;
+	dup2(f1, f2);
+	close(f1);
+}
+
+void exec_command(const std::string &command, int in, int out){
+	int pid;
+
+	pid = fork();
+	if (pid == 0) {
+		ft_dup2(in, 0);
+		ft_dup2(out, 1);
+		char **args = getCommandArgs(command);
+		std::cerr << "*" << command << std::endl;
+		if (execv(args[0], args) == -1)
+			(std::cerr << "error" << std::endl, exit(1));
+	}
+	waitpid(pid, 0, 0);
 
 }
 
+void	pipe_nodes(Tree::nodePointer node, int in, int out)
+{
+	int	pid;
+	int	fds[2];
 
+	pipe(fds);
+	pid = fork();
+	if (!pid) {
+		close(fds[0]);
+		exec(node->leftChild, in, fds[1]);
+		exit(0);
+	}
+	close(fds[1]);
+	exec(node->rightChild, fds[0], out);
+	close(fds[0]);
+	waitpid(pid, 0, 0);
+}
+
+void exec(Tree::nodePointer node, int in, int out){
+	if (node->data == "|") {
+		pipe_nodes(node, in, out);
+		return ;
+	}
+//	std::cerr << node->data << std::endl;
+	exec_command(node->data, in, out);
+}
 
 void start(){
 	Tree t = Tree(".");
-	std::string command = "ls | ls > i <s <<s | cat >a";
+	std::string command = "(/bin/ls -la | /usr/bin/wc) | ((/bin/cat) | /usr/bin/wc)";
 	//std::string command = "ls | l";
 	parse(t, command, t.getRoot());
-
+	t.printTree();
+	exec(t.getRoot(), 0, 1);
 	//first_operator(command.c_str());
 
-	const char* s1;
-	const char* s2;
-	split(command.c_str(), "&&", &s1, &s2);
-	t.printTree();
+	//const char* s1;
+	//const char* s2;
+	//split(command.c_str(), "&&", &s1, &s2);
+
 }
 
 int main(){
