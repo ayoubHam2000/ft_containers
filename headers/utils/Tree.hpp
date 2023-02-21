@@ -10,6 +10,8 @@
 #include <iostream>
 #include "queue.hpp"
 
+
+
 namespace ft{
 
 #pragma region Node
@@ -17,6 +19,8 @@ namespace ft{
  * @brief A Binary Search node that used in Binary Search Tree and AVL tree
  * @tparam T
  */
+
+
 
 template <class T>
 struct BinaryNode
@@ -96,6 +100,109 @@ public:
 		if (this->leftChild)
 			return (findMax(this->leftChild));
 		return (findSmaller(this));
+	}
+
+
+	void	print_center(std::ostream &os, const std::string &item, size_t buffer_size, int color){
+		if (color == RED)
+			os << "\033[1;31m";
+		size_t i = 0;
+		if (item.size() > buffer_size){
+			os << item.substr(0, buffer_size - 1);
+			os << '.';
+		}else{
+			size_t nb = buffer_size - item.size();
+			while (i < nb / 2){
+				os << ' ';
+				i++;
+			}
+			os << item;
+			while (i < nb){
+				os << ' ';
+				i++;
+			}
+		}
+		if (color == RED)
+			os << "\033[0m";
+	}
+
+	void 	print_branches(std::ostream &os, size_t buffer_size){
+		size_t i = 0;
+		size_t nb = buffer_size / 4;
+		while (i < nb){
+			os << ' ';
+			i++;
+		}
+		os << "╭";
+		i++;
+		while (i + nb + 2 < buffer_size){
+			if (i == (buffer_size - 1) / 2)
+				os << "┴";
+			else
+				os << "─";
+			i++;
+		}
+		os << "╮";
+		i++;
+		while (i < buffer_size){
+			os << ' ';
+			i++;
+		}
+	}
+
+	void 	printTree(std::ostream &os, size_t tree_height){
+		size_t level_item = tree_height;
+		size_t buffer_size = 1;
+		size_t item_len = 4;
+		while (level_item--){
+			buffer_size *= 2;
+		}
+		buffer_size = item_len * buffer_size;
+
+		size_t level = 1;
+		size_t depth = 0;
+		size_t type = 1;
+		level_item = 1;
+
+		ft::queue<nodePointer> queue;
+		ft::queue<bool> is_empty_node;
+		queue.enqueue(this);
+		while (depth < tree_height){
+			if (type == 1){
+				nodePointer item = queue.dequeue();
+				if (item){
+					print_center(os, item->data, buffer_size, item->getColor());
+					queue.enqueue(item->leftChild);
+					queue.enqueue(item->rightChild);
+					is_empty_node.enqueue(true);
+				}else{
+					queue.enqueue(NULL);
+					queue.enqueue(NULL);
+					print_center(os, " ", buffer_size, BLACK); //"?" to show deleted item
+					is_empty_node.enqueue(false); //false for turn of branch drawing
+				}
+				level_item--;
+				if (level_item == 0){
+					type = 2;
+					level_item = level;
+					level *= 2;
+					depth++;
+					os << "\n";
+				}
+			} else {
+				while (level_item--){
+					bool val = is_empty_node.dequeue();
+					if (val)
+						print_branches(os, buffer_size);
+					else
+						print_center(os, " ", buffer_size, BLACK);
+				}
+				level_item = level;
+				type = 1;
+				buffer_size /= 2;
+				os << "\n";
+			}
+		}
 	}
 
 public:
@@ -567,112 +674,10 @@ public:
 		return (this->findNode(_parent, value));
 	}
 
-	void	print_center(std::ostream &os, const std::string &item, size_type buffer_size, int color){
-		if (color == nodeType::RED)
-			os << "\033[1;31m";
-		size_type i = 0;
-		if (item.size() > buffer_size){
-			os << item.substr(0, buffer_size - 1);
-			os << '.';
-		}else{
-			size_type nb = buffer_size - item.size();
-			while (i < nb / 2){
-				os << ' ';
-				i++;
-			}
-			os << item;
-			while (i < nb){
-				os << ' ';
-				i++;
-			}
-		}
-		if (color == nodeType::RED)
-			os << "\033[0m";
-	}
-
-	void 	print_branches(std::ostream &os, size_type buffer_size){
-		size_type i = 0;
-		size_type nb = buffer_size / 4;
-		while (i < nb){
-			os << ' ';
-			i++;
-		}
-		os << "╭";
-		i++;
-		while (i + nb + 2 < buffer_size){
-			if (i == (buffer_size - 1) / 2)
-				os << "┴";
-			else
-				os << "─";
-			i++;
-		}
-		os << "╮";
-		i++;
-		while (i < buffer_size){
-			os << ' ';
-			i++;
-		}
-	}
-
-	void 	printTree(nodeType *node, std::ostream &os, size_t tree_height){
-		size_type level_item = tree_height;
-		size_type buffer_size = 1;
-		size_type item_len = 4;
-		while (level_item--){
-			buffer_size *= 2;
-		}
-		buffer_size = item_len * buffer_size;
-
-		size_type level = 1;
-		size_type depth = 0;
-		size_type type = 1;
-		level_item = 1;
-
-		ft::queue<nodePointer> queue;
-		ft::queue<bool> is_empty_node;
-		queue.enqueue(node);
-		while (depth < tree_height){
-			if (type == 1){
-				nodePointer item = queue.dequeue();
-				if (item){
-					print_center(os, std::to_string(item->data), buffer_size, item->getColor());
-					queue.enqueue(item->leftChild);
-					queue.enqueue(item->rightChild);
-					is_empty_node.enqueue(true);
-				}else{
-					queue.enqueue(NULL);
-					queue.enqueue(NULL);
-					print_center(os, " ", buffer_size, nodeType::BLACK); //"?" to show deleted item
-					is_empty_node.enqueue(false); //false for turn of branch drawing
-				}
-				level_item--;
-				if (level_item == 0){
-					type = 2;
-					level_item = level;
-					level *= 2;
-					depth++;
-					os << "\n";
-				}
-			} else {
-				while (level_item--){
-					bool val = is_empty_node.dequeue();
-					if (val)
-						print_branches(os, buffer_size);
-					else
-						print_center(os, " ", buffer_size, nodeType::BLACK);
-				}
-				level_item = level;
-				type = 1;
-				buffer_size /= 2;
-				os << "\n";
-			}
-		}
-	}
-
 	void	printTree(std::ostream &os = std::cout){
 		int h = height() + 1;
 		if (h >= 0)
-			printTree(this->_parent, os, h);
+			_parent->printTree(os, h);
 		nodePointer a = findMax();
 		if (_dummyMax.parent && _dummyMax.parent != a){
 			os << a << " " << _dummyMax.parent << std::endl;
